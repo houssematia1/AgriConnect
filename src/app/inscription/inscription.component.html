@@ -1,0 +1,31 @@
+<div class="inscription-form">
+    <h2>Inscription</h2>
+    <form (ngSubmit)="onSubmit()">
+      <label for="nom">Nom :</label>
+      <input type="text" id="nom" name="nom" [(ngModel)]="user.nom" required>
+      
+      <label for="prenom">Prénom :</label>
+      <input type="text" id="prenom" name="prenom" [(ngModel)]="user.prenom" required>
+      
+      <label for="email">Email :</label>
+      <input type="email" id="email" name="email" [(ngModel)]="user.email" required>
+      
+      <label for="motDePasse">Mot de passe :</label>
+      <input type="password" id="motDePasse" name="motDePasse" [(ngModel)]="user.motDePasse" required>
+      
+      <label for="numeroDeTelephone">Numéro de téléphone :</label>
+      <input type="text" id="numeroDeTelephone" name="numeroDeTelephone" [(ngModel)]="user.numeroDeTelephone" required>
+      
+      <!-- Menu déroulant pour choisir le rôle -->
+      <label for="role">Rôle :</label>
+      <select id="role" name="role" [(ngModel)]="user.role">
+        <option value="user">Client</option>
+        <option value="agriculteur">Agriculteur</option>
+        <option value="livreur">Livreur</option>
+      </select>
+      
+      <button type="submit">S'inscrire</button>
+    </form>
+    <p>{{ message }}</p>
+  </div>
+  
