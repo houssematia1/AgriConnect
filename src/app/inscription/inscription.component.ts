@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { UserService } from '../user.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-inscription',
@@ -13,22 +14,23 @@ export class InscriptionComponent {
     email: '',
     motDePasse: '',
     numeroDeTelephone: '',
-    role: 'user'  // par défaut "user" (client)
+    role: 'user'  
   };
 
   message: string = '';
 
-  constructor(private userService: UserService) { }
+  constructor(private userService: UserService,private router: Router ) { }
 
   onSubmit(): void {
     this.userService.registerUser(this.user).subscribe(
       (response) => {
-        console.log('Inscription réussie !', response);
-        this.message = "Inscription réussie !";
+        console.log('User registered:', response);
+        // After successful registration, you can proceed to login or other actions.
+        this.router.navigate(['/login']);
       },
       (error) => {
-        console.error('Erreur lors de l\'inscription', error);
-        this.message = error.error || "Erreur lors de l'inscription";
+        console.error('Error during registration:', error);
+        this.message = 'Erreur lors de l\'inscription';
       }
     );
   }

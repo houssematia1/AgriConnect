@@ -1,0 +1,143 @@
+/* Conteneur global de la page */
+.user-cards-container {
+  margin: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.user-cards-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* Barre de recherche et filtre par rôle améliorée */
+.filter-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  background-color: #f8f9fa;
+  padding: 12px 20px;
+  border-radius: 25px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.filter-container input,
+.filter-container select {
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  padding: 8px 12px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.3s ease;
+  background-color: #fff;
+}
+
+.filter-container input:focus,
+.filter-container select:focus {
+  border-color: #007bff;
+}
+
+/* Grille des cartes */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+/* Carte utilisateur */
+.user-card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.2s ease;
+}
+
+.user-card:hover {
+  transform: translateY(-5px);
+}
+
+/* Entête de la carte */
+.card-header {
+  background-color: #007bff;
+  color: #fff;
+  padding: 10px;
+  text-align: center;
+  font-size: 14px;
+}
+
+/* Corps de la carte */
+.card-body {
+  padding: 15px;
+}
+
+.user-name {
+  margin: 0;
+  font-size: 20px;
+  color: #333;
+}
+
+.user-email,
+.user-phone,
+.user-role {
+  margin: 5px 0;
+  color: #666;
+  font-size: 14px;
+}
+
+/* Pied de carte et boutons d'action */
+.card-footer {
+  display: flex;
+  justify-content: space-around;
+  padding: 10px;
+  background-color: #f1f1f1;
+}
+
+/* Boutons modernes */
+.btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Bouton Edit */
+.btn-edit {
+  background: linear-gradient(45deg, #17a2b8, #0f6674);
+  color: #fff;
+  box-shadow: 0 4px 6px rgba(23, 162, 184, 0.4);
+}
+
+.btn-edit:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 10px rgba(23, 162, 184, 0.6);
+}
+
+/* Bouton Delete */
+.btn-delete {
+  background: linear-gradient(45deg, #dc3545, #b02a37);
+  color: #fff;
+  box-shadow: 0 4px 6px rgba(220, 53, 69, 0.4);
+}
+
+.btn-delete:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 10px rgba(220, 53, 69, 0.6);
+}
+
+/* Bouton Block */
+.btn-block {
+  background: linear-gradient(45deg, #ffc107, #e0a800);
+  color: #fff;
+  box-shadow: 0 4px 6px rgba(255, 193, 7, 0.4);
+}
+
+.btn-block:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 10px rgba(255, 193, 7, 0.6);
+}

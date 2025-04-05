@@ -1,4 +1,5 @@
 import { Component, AfterViewInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { UserService } from '../user.service';
 import anime from 'animejs/lib/anime.es.js';
 
@@ -14,14 +15,21 @@ export class LoginComponent implements AfterViewInit {
   };
   message = '';
 
-  constructor(private userService: UserService) {}
+  constructor(private userService: UserService, private router: Router) {}
 
   onSubmit(): void {
     this.userService.login(this.credentials).subscribe(
-      (response: any) => {
-        console.log('Login réussi :', response);
+      (user: any) => {
+        console.log('Login réussi :', user);
         this.message = 'Login réussi !';
-        // Vous pouvez rediriger l'utilisateur ici après login réussi
+       
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        
+        if (user && user.role && user.role.trim().toLowerCase() === 'admin') {
+          this.router.navigate(['/users']);
+        } else {
+          this.router.navigate(['/']);
+        }
       },
       (error: any) => {
         console.error('Erreur de login :', error);
@@ -41,16 +49,8 @@ export class LoginComponent implements AfterViewInit {
         if (current) current.pause();
         current = anime({
           targets: 'path',
-          strokeDashoffset: {
-            value: 0,
-            duration: 700,
-            easing: 'easeOutQuart'
-          },
-          strokeDasharray: {
-            value: '240 1386',
-            duration: 700,
-            easing: 'easeOutQuart'
-          }
+          strokeDashoffset: { value: 0, duration: 700, easing: 'easeOutQuart' },
+          strokeDasharray: { value: '240 1386', duration: 700, easing: 'easeOutQuart' }
         });
       });
     }
@@ -60,16 +60,8 @@ export class LoginComponent implements AfterViewInit {
         if (current) current.pause();
         current = anime({
           targets: 'path',
-          strokeDashoffset: {
-            value: -336,
-            duration: 700,
-            easing: 'easeOutQuart'
-          },
-          strokeDasharray: {
-            value: '240 1386',
-            duration: 700,
-            easing: 'easeOutQuart'
-          }
+          strokeDashoffset: { value: -336, duration: 700, easing: 'easeOutQuart' },
+          strokeDasharray: { value: '240 1386', duration: 700, easing: 'easeOutQuart' }
         });
       });
     }
@@ -79,16 +71,8 @@ export class LoginComponent implements AfterViewInit {
         if (current) current.pause();
         current = anime({
           targets: 'path',
-          strokeDashoffset: {
-            value: -730,
-            duration: 700,
-            easing: 'easeOutQuart'
-          },
-          strokeDasharray: {
-            value: '530 1386',
-            duration: 700,
-            easing: 'easeOutQuart'
-          }
+          strokeDashoffset: { value: -730, duration: 700, easing: 'easeOutQuart' },
+          strokeDasharray: { value: '530 1386', duration: 700, easing: 'easeOutQuart' }
         });
       });
     }
