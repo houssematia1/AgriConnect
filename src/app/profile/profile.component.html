@@ -1,0 +1,38 @@
+<div class="profile-wrapper">
+  <div class="profile-header">
+    <h1>{{user.prenom}} {{user.nom}}</h1>
+    <p class="role">{{user.role}}</p>
+  </div>
+  <div class="profile-content">
+    <div class="avatar">
+    </div>
+    <div class="details-card">
+      <h2>Profile Details</h2>
+      <div class="detail-item">
+        <span class="label">ID:</span>
+        <span class="value">{{user.id}}</span>
+      </div>
+      <div class="detail-item">
+        <span class="label">Email:</span>
+        <span class="value">{{user.email}}</span>
+      </div>
+      <div class="detail-item">
+        <span class="label">Phone:</span>
+        <span class="value">{{user.numeroDeTelephone || 'Not provided'}}</span>
+      </div>
+      <div class="detail-item">
+        <span class="label">Delivery Address:</span>
+        <span class="value">{{user.adresseLivraison || 'Not provided'}}</span>
+      </div>
+      <div class="detail-item">
+        <span class="label">Vehicle:</span>
+        <span class="value">{{user.vehicule || 'Not provided'}}</span>
+      </div>
+    </div>
+  </div>
+  <div class="profile-actions">
+    <button class="back-btn" (click)="goBack()">
+      <span class="material-icons"></span> Back to Dashboard
+    </button>
+  </div>
+</div>

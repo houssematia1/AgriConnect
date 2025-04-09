@@ -1,0 +1,90 @@
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<!-- Sidebar -->
+<div class="sidebar" [ngClass]="{'collapsed': isSidebarCollapsed}">
+  <h2>
+    <button class="toggle-btn" (click)="toggleSidebar()">
+      <span class="material-icons">menu</span>
+    </button>
+    <span>Delivery</span>
+  </h2>
+  <ul>
+    <li>
+      <a [routerLink]="['/livraison', userId]" data-tooltip="Orders">
+        <i class="material-icons">assignment</i><span>Orders</span>
+      </a>
+    </li>
+    <li><a href="#" data-tooltip="History"><i class="material-icons">history</i><span>History</span></a></li>
+    <li>
+      <a [routerLink]="['/profile', userId]" data-tooltip="Profile">
+        <i class="material-icons">person</i><span>Profile</span>
+      </a>
+    </li>
+    <li>
+      <a href="javascript:void(0)" (click)="logout()" data-tooltip="Logout">
+        <i class="material-icons">exit_to_app</i><span>Logout</span>
+      </a>
+    </li>
+  </ul>
+</div>
+
+<!-- Main Content -->
+<div class="container" [ngClass]="{'expanded': isSidebarCollapsed}">
+  <div class="header">
+    <h1>Driver Dashboard</h1>
+    <span class="user">Hello, {{driverName}}</span>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <h3>Current Orders</h3>
+      <div class="order"
+           *ngFor="let order of orders"
+           [ngClass]="{
+             'livre': order.statusLivraison === 'LIVRE',
+             'non-livre': order.statusLivraison === 'NON_LIVRE'
+           }"
+           [attr.data-id]="order.id">
+        <span>#{{order.id}} - {{order.orderDate | date:'medium'}}</span>
+        <button
+          [disabled]="order.statusLivraison !== 'EN_COURS'"
+          (click)="showConfirm(order.id)">
+          {{order.statusLivraison === 'EN_COURS' ? 'Update Status' :
+          order.statusLivraison === 'LIVRE' ? 'DELIVERED' : 'NOT DELIVERED'}}
+        </button>
+        <div class="photo-preview" *ngIf="order.photo">
+          <img [src]="order.photo" alt="Proof of delivery">
+        </div>
+        <div class="reason" *ngIf="order.reason">Reason: {{order.reason}}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal" id="confirmModal">
+  <div class="modal-content">
+    <p>Update status for Order #{{currentOrderId}}</p>
+    <div class="modal-buttons" *ngIf="!isCameraActive && !isReasonInputActive">
+      <button class="livre" (click)="startCamera()">DELIVERED</button>
+      <button class="non-livre" (click)="showReasonInput()">NOT DELIVERED</button>
+      <button class="cancel" (click)="hideConfirm()">Cancel</button>
+    </div>
+
+    <video #video autoplay [hidden]="!isCameraActive"></video>
+    <canvas #canvas hidden></canvas>
+    <textarea #reasonInput
+              placeholder="Reason for non-delivery (required)"
+              [hidden]="!isReasonInputActive"></textarea>
+
+    <div class="modal-buttons" *ngIf="isCameraActive">
+      <button class="livre" (click)="capturePhoto()">Capture Photo</button>
+      <button class="cancel" (click)="hideConfirm()">Cancel</button>
+    </div>
+
+    <div class="modal-buttons" *ngIf="isReasonInputActive">
+      <button class="non-livre" (click)="submitNonLivre()">Submit</button>
+      <button class="cancel" (click)="hideConfirm()">Cancel</button>
+    </div>
+  </div>
+</div>
