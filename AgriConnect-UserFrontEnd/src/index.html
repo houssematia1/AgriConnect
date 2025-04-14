@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>WebSocket Test</title>
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+<body>
+  <h2>Notifications WebSocket</h2>
+  <div id="notifications"></div>
+
+  <script>
+    const socket = new SockJS('http://localhost:8082/ws');
+    const stompClient = Stomp.over(socket);
+
+    const destinataireId = 1;
+
+    stompClient.connect({}, function (frame) {
+      console.log('Connecté : ' + frame);
+
+      stompClient.subscribe('/topic/notifications/' + destinataireId, function (notification) {
+        const body = JSON.parse(notification.body);
+        const div = document.getElementById('notifications');
+        div.innerHTML += `<p><strong>Notification reçue :</strong> ${body.message}</p>`;
+      });
+
+      stompClient.subscribe('/topic/notifications', function (notification) {
+        const body = JSON.parse(notification.body);
+        const div = document.getElementById('notifications');
+        div.innerHTML += `<p><strong>Nouveau produit :</strong> ${body.message}</p>`;
+      });
+    }, function (error) {
+      console.error('Erreur de connexion WebSocket :', error);
+    });
+  </script>
+</body>
+</html>
