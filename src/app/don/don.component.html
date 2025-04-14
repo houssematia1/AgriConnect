@@ -1,0 +1,118 @@
+<div class="container">
+  <h2>Donations Management</h2>
+
+  <div class="filter-section">
+    <h3>Filter by Amount</h3>
+    <div class="price-filter">
+      <div class="filter-group">
+        <label>Min Amount:</label>
+        <input type="number" [(ngModel)]="minPrice" placeholder="Minimum">
+      </div>
+      <div class="filter-group">
+        <label>Max Amount:</label>
+        <input type="number" [(ngModel)]="maxPrice" placeholder="Maximum">
+      </div>
+      <div class="filter-actions">
+        <button class="btn-filter" (click)="filterByPrice()">Apply Filter</button>
+        <button class="btn-reset" (click)="resetPriceFilter()">Reset</button>
+      </div>
+    </div>
+  </div>
+  
+  <button class="btn-add" (click)="openForm()">Add New Donation</button>
+
+  <div class="form-modal" *ngIf="showForm">
+    <div class="modal-content">
+      <h3>{{ selectedDon.id ? 'Edit' : 'Add' }} Donation</h3>
+      
+      <div class="form-group">
+        <label>Title:</label>
+        <input type="text" [(ngModel)]="selectedDon.titre">
+      </div>
+
+      <div class="form-group">
+        <label>Description:</label>
+        <textarea [(ngModel)]="selectedDon.description"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Amount:</label>
+        <input type="number" [(ngModel)]="selectedDon.montant">
+      </div>
+
+      <div class="form-group">
+        <label>Status:</label>
+        <select [(ngModel)]="selectedDon.status">
+          <option value="ACCEPTE">Accepted</option>
+          <option value="REFUSE">Refused</option>
+          <option value="REFUSE">Encours</option>
+
+        </select>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-cancel" (click)="closeForm()">Cancel</button>
+        <button class="btn-submit" (click)="submitForm()">
+          {{ selectedDon.id ? 'Update' : 'Create' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" *ngIf="showDeleteModal">
+    <div class="delete-modal">
+      <h3>Confirm Deletion</h3>
+      <p>Are you sure you want to delete the donation "{{ donToDelete?.titre }}"?</p>
+      
+      <div class="modal-actions">
+        <button 
+          class="btn-cancel" 
+          (click)="closeDeleteModal()"
+          [disabled]="isDeleting"
+        >
+          Cancel
+        </button>
+        <button 
+          class="btn-delete" 
+          (click)="confirmDelete()"
+          [disabled]="isDeleting"
+        >
+          <span *ngIf="!isDeleting">Delete</span>
+          <span *ngIf="isDeleting">Deleting...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <table class="don-table">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Description</th>
+        <th>Amount</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let don of filteredDons">
+        <td>{{ don.titre }}</td>
+        <td>{{ don.description }}</td>
+        <td>{{ don.montant | currency }}</td>
+        <td>
+          <span class="status" [class]="don.status.toLowerCase()">
+            {{ don.status === 'ACCEPTE' ? 'Accepted' : 'EnCours' }}
+          </span>
+        </td>
+        <td>
+          <button class="btn-edit" (click)="openForm(don)">Edit</button>
+          <button class="btn-delete" (click)="openDeleteModal(don)">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div *ngIf="priceFilterActive && filteredDons.length === 0" class="no-results">
+    No donations found matching your filter criteria
+  </div>
+</div>

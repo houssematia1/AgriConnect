@@ -1,0 +1,309 @@
+/* don.component.css */
+.container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .don-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  .don-table th, .don-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .don-table th {
+    background-color: #f5f5f5;
+  }
+  
+  .btn-add, .btn-edit, .btn-delete {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 2px;
+  }
+  
+  .btn-add {
+    background-color: #4CAF50;
+    color: white;
+  }
+  
+  .btn-edit {
+    background-color: #2196F3;
+    color: white;
+  }
+  
+  .btn-delete {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  .status {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.9em;
+  }
+  
+  .status.pending {
+    background-color: #fff0c2;
+    color: #8a5340;
+  }
+  
+  .status.completed {
+    background-color: #c8e6c9;
+    color: #256029;
+  }
+  
+  .status.cancelled {
+    background-color: #ffcdd2;
+    color: #c63737;
+  }
+  
+  .form-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 400px;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  .form-actions {
+    margin-top: 20px;
+    text-align: right;
+  }
+  
+  .btn-submit {
+    background-color: #4CAF50;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .btn-cancel {
+    background-color: #666;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 10px;
+  }
+  .status.accepte {
+    background-color: #c8e6c9;
+    color: #256029;
+  }
+  
+  .status.refuse {
+    background-color: #ffcdd2;
+    color: #c63737;
+  }
+  /* don.component.css */
+.btn-reclamation {
+    background-color: #ff9800;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 2px;
+  }
+  
+  /* Add this to your existing status classes */
+  .status.firstclass {
+    background-color: #e1bee7;
+    color: #6a1b9a;
+  }
+  
+  .status.secondary {
+    background-color: #b2dfdb;
+    color: #004d40;
+  }
+  /* don.component.css */
+.btn-claim {
+    background-color: #ff9800;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 2px;
+  }
+  
+  /* Add type status colors */
+  .status.urgent {
+    background-color: #ffcdd2;
+    color: #c63737;
+  }
+  
+  .status.classic {
+    background-color: #c8e6c9;
+    color: #256029;
+  }
+  
+  .status.secondary {
+    background-color: #b2dfdb;
+    color: #004d40;
+  }
+  
+  .status.firstclass {
+    background-color: #e1bee7;
+    color: #6a1b9a;
+  }
+  /* Delete Confirmation Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.delete-modal {
+  background-color: white;
+  padding: 25px;
+  border-radius: 8px;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.delete-modal h3 {
+  margin-top: 0;
+  color: #f44336;
+}
+
+.delete-modal p {
+  margin-bottom: 25px;
+  line-height: 1.5;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Disabled state for buttons */
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Ensure form modal appears above delete modal */
+.form-modal {
+  z-index: 1001;
+}
+
+/* Filter Section Styles */
+.filter-section {
+  background-color: #f5f5f5;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.filter-section h3 {
+  margin-top: 0;
+  color: #333;
+}
+
+.price-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  align-items: flex-end;
+}
+
+.filter-group {
+  flex: 1;
+  min-width: 150px;
+}
+
+.filter-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.filter-group input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.btn-filter {
+  background-color: #2196F3;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-reset {
+  background-color: #666;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.no-results {
+  padding: 15px;
+  background-color: #fff0f0;
+  border: 1px solid #ffcdd2;
+  border-radius: 4px;
+  margin-top: 20px;
+  text-align: center;
+  color: #c63737;
+}
