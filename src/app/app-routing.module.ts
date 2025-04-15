@@ -8,6 +8,7 @@ import { UserEditComponent } from './user-edit/user-edit.component';
 import { AdminGuard } from './guards/admin.guard';
 import {LivraisonComponent} from "./livraison/livraison.component";
 import {ProfileComponent} from "./profile/profile.component";
+import {HistoriqueComponent} from "./historique/historique.component";
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -17,6 +18,9 @@ const routes: Routes = [
   { path: 'users/edit/:id', component: UserEditComponent, canActivate: [AdminGuard] },
   { path: 'livraison/:userId', component: LivraisonComponent },
   { path: 'profile/:userId', component: ProfileComponent },
+  { path: 'historique/:userId', component: HistoriqueComponent },
+
+
 
 
   { path: '**', redirectTo: '' }

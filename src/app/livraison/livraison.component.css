@@ -195,34 +195,86 @@ body {
   color: #2d3748;
 }
 
+/* Order Styles */
 .order {
-  padding: 16px;
+  padding: 20px;
   background: #f8fafc;
   border-radius: 12px;
   margin-bottom: 16px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   transition: all 0.3s ease;
 }
 
-.order.livre {
+.order-info {
+  flex: 1;
+  margin-right: 20px;
+}
+
+.order-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.order-id {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e40af;
+}
+
+.order-status {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.order-status.pending {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.order-status.livre {
   background: #d1fae5;
-  opacity: 0.9;
+  color: #059669;
 }
 
-.order.non-livre {
+.order-status.non_livre {
   background: #fee2e2;
-  opacity: 0.9;
+  color: #dc2626;
 }
 
-.order span {
-  font-size: 16px;
+.client-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.client-name,
+.client-address,
+.client-phone {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   color: #4b5563;
-  max-width: 65%;
 }
 
-.order button {
+.client-info .material-icons {
+  font-size: 18px;
+  color: #6b7280;
+}
+
+.order-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.order-actions button {
   padding: 10px 20px;
   background: linear-gradient(90deg, #3b82f6, #2563eb);
   color: #fff;
@@ -232,14 +284,15 @@ body {
   font-size: 14px;
   font-weight: 600;
   transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
-.order button:hover {
+.order-actions button:hover {
   background: linear-gradient(90deg, #2563eb, #1e40af);
-  transform: scale(1.08);
+  transform: translateY(-2px);
 }
 
-.order button:disabled {
+.order-actions button:disabled {
   background: #d1d5db;
   cursor: not-allowed;
   transform: none;

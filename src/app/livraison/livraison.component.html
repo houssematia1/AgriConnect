@@ -14,7 +14,9 @@
         <i class="material-icons">assignment</i><span>Orders</span>
       </a>
     </li>
-    <li><a href="#" data-tooltip="History"><i class="material-icons">history</i><span>History</span></a></li>
+    <li>      <a [routerLink]="['/historique', userId]" data-tooltip="Historique">
+      <i class="material-icons">history</i><span>Historique</span>
+    </a></li>
     <li>
       <a [routerLink]="['/profile', userId]" data-tooltip="Profile">
         <i class="material-icons">person</i><span>Profile</span>
@@ -37,25 +39,46 @@
 
   <div class="cards">
     <div class="card">
-      <h3>Current Orders</h3>
+      <h3>Commandes en cours</h3>
       <div class="order"
-           *ngFor="let order of orders"
+           *ngFor="let commande of commandes"
            [ngClass]="{
-             'livre': order.statusLivraison === 'LIVRE',
-             'non-livre': order.statusLivraison === 'NON_LIVRE'
+             'livre': commande.statut === 'LIVRE',
+             'non-livre': commande.statut === 'NON_LIVRE'
            }"
-           [attr.data-id]="order.id">
-        <span>#{{order.id}} - {{order.orderDate | date:'medium'}}</span>
-        <button
-          [disabled]="order.statusLivraison !== 'EN_COURS'"
-          (click)="showConfirm(order.id)">
-          {{order.statusLivraison === 'EN_COURS' ? 'Update Status' :
-          order.statusLivraison === 'LIVRE' ? 'DELIVERED' : 'NOT DELIVERED'}}
-        </button>
-        <div class="photo-preview" *ngIf="order.photo">
-          <img [src]="order.photo" alt="Proof of delivery">
+           [attr.data-id]="commande.id">
+        <div class="order-info">
+          <div class="order-header">
+            <span class="order-id">#{{commande.id}}</span>
+            <span class="order-status" [ngClass]="commande.statut.toLowerCase()">{{commande.statut}}</span>
+          </div>
+          <div class="client-info">
+            <div class="client-name">
+              <i class="material-icons">person</i>
+              <span>{{commande.clientNom}}</span>
+            </div>
+            <div class="client-address">
+              <i class="material-icons">location_on</i>
+              <span>{{commande.address}}</span>
+            </div>
+            <div class="client-phone">
+              <i class="material-icons">phone</i>
+              <span>{{commande.telephone}}</span>
+            </div>
+          </div>
         </div>
-        <div class="reason" *ngIf="order.reason">Reason: {{order.reason}}</div>
+        <div class="order-actions">
+          <button
+            [disabled]="commande.statut !== 'PENDING'"
+            (click)="showConfirm(commande.id)">
+            {{commande.statut === 'PENDING' ? 'Mettre à jour le statut' :
+            commande.statut === 'LIVRE' ? 'LIVRÉ' : 'NON LIVRÉ'}}
+          </button>
+          <div class="photo-preview" *ngIf="commande.photo">
+            <img [src]="commande.photo" alt="Preuve de livraison">
+          </div>
+          <div class="reason" *ngIf="commande.reason">Raison: {{commande.reason}}</div>
+        </div>
       </div>
     </div>
   </div>

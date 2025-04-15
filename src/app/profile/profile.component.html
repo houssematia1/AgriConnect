@@ -1,38 +1,72 @@
-<div class="profile-wrapper">
-  <div class="profile-header">
-    <h1>{{user.prenom}} {{user.nom}}</h1>
-    <p class="role">{{user.role}}</p>
-  </div>
-  <div class="profile-content">
-    <div class="avatar">
-    </div>
-    <div class="details-card">
-      <h2>Profile Details</h2>
-      <div class="detail-item">
-        <span class="label">ID:</span>
-        <span class="value">{{user.id}}</span>
-      </div>
-      <div class="detail-item">
-        <span class="label">Email:</span>
-        <span class="value">{{user.email}}</span>
-      </div>
-      <div class="detail-item">
-        <span class="label">Phone:</span>
-        <span class="value">{{user.numeroDeTelephone || 'Not provided'}}</span>
-      </div>
-      <div class="detail-item">
-        <span class="label">Delivery Address:</span>
-        <span class="value">{{user.adresseLivraison || 'Not provided'}}</span>
-      </div>
-      <div class="detail-item">
-        <span class="label">Vehicle:</span>
-        <span class="value">{{user.vehicule || 'Not provided'}}</span>
-      </div>
-    </div>
-  </div>
-  <div class="profile-actions">
-    <button class="back-btn" (click)="goBack()">
-      <span class="material-icons"></span> Back to Dashboard
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<!-- Sidebar -->
+<div class="sidebar" [ngClass]="{'collapsed': isSidebarCollapsed}">
+  <h2>
+    <button class="toggle-btn" (click)="toggleSidebar()">
+      <span class="material-icons">menu</span>
     </button>
+    <span>Delivery</span>
+  </h2>
+  <ul>
+    <li>
+      <a [routerLink]="['/livraison', userId]" data-tooltip="Orders">
+        <i class="material-icons">assignment</i><span>Orders</span>
+      </a>
+    </li>
+    <li>
+      <a [routerLink]="['/historique', userId]" data-tooltip="Historique">
+        <i class="material-icons">history</i><span>Historique</span>
+      </a>
+    </li>
+    <li>
+      <a [routerLink]="['/profile', userId]" data-tooltip="Profile" class="active">
+        <i class="material-icons">person</i><span>Profile</span>
+      </a>
+    </li>
+    <li>
+      <a href="javascript:void(0)" (click)="logout()" data-tooltip="Logout">
+        <i class="material-icons">exit_to_app</i><span>Logout</span>
+      </a>
+    </li>
+  </ul>
+</div>
+
+<!-- Main Content -->
+<div class="container" [ngClass]="{'expanded': isSidebarCollapsed}">
+  <div class="header">
+    <h1>Profile</h1>
+    <span class="user">Hello, {{user.prenom}}</span>
+  </div>
+
+  <div class="profile-content">
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="avatar">
+          <span class="material-icons">account_circle</span>
+        </div>
+        <h2>{{user.prenom}} {{user.nom}}</h2>
+        <p class="role">{{user.role}}</p>
+      </div>
+
+      <div class="profile-details">
+        <div class="detail-item">
+          <span class="label">ID:</span>
+          <span class="value">{{user.id}}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Email:</span>
+          <span class="value">{{user.email}}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Phone:</span>
+          <span class="value">{{user.numeroDeTelephone || 'Not provided'}}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Delivery Address:</span>
+          <span class="value">{{user.adresseLivraison || 'Not provided'}}</span>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

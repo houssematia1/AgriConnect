@@ -1,0 +1,145 @@
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<!-- Sidebar -->
+<div class="sidebar" [ngClass]="{'collapsed': isSidebarCollapsed}">
+  <h2>
+    <button class="toggle-btn" (click)="toggleSidebar()">
+      <span class="material-icons">menu</span>
+    </button>
+    <span>Delivery</span>
+  </h2>
+  <ul>
+    <li>
+      <a [routerLink]="['/livraison', userId]" data-tooltip="Orders">
+        <i class="material-icons">assignment</i><span>Orders</span>
+      </a>
+    </li>
+    <li>
+      <a [routerLink]="['/historique', userId]" data-tooltip="Historique" class="active">
+        <i class="material-icons">history</i><span>Historique</span>
+      </a>
+    </li>
+    <li>
+      <a [routerLink]="['/profile', userId]" data-tooltip="Profile">
+        <i class="material-icons">person</i><span>Profile</span>
+      </a>
+    </li>
+    <li>
+      <a href="javascript:void(0)" (click)="logout()" data-tooltip="Logout">
+        <i class="material-icons">exit_to_app</i><span>Logout</span>
+      </a>
+    </li>
+  </ul>
+</div>
+
+<!-- Main Content -->
+<div class="container" [ngClass]="{'expanded': isSidebarCollapsed}">
+  <div class="header">
+    <div class="header-content">
+      <h1>Delivery History</h1>
+      <span class="user">Hello, {{user.prenom}} {{user.nom}}</span>
+    </div>
+    <div class="header-actions">
+      <button class="refresh-btn" (click)="loadHistory()">
+        <i class="material-icons">refresh</i>
+        Refresh
+      </button>
+    </div>
+  </div>
+
+  <div class="history-content">
+    <div class="history-card">
+      <!-- Search and Filter Section -->
+      <div class="search-filter-section">
+        <div class="search-bar">
+          <span class="material-icons">search</span>
+          <input
+            type="text"
+            placeholder="Search deliveries..."
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="onSearchChange($event)"
+          />
+        </div>
+
+        <div class="filter-controls">
+          <div class="filter-field">
+            <label for="status">Status</label>
+            <select id="status" [(ngModel)]="filters.status" (ngModelChange)="applyFilters()">
+              <option value="">All Status</option>
+              <option value="delivered">Delivered</option>
+              <option value="in_progress">In Progress</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </div>
+          <div class="filter-field">
+            <label for="type">Type</label>
+            <select id="type" [(ngModel)]="filters.type" (ngModelChange)="applyFilters()">
+              <option value="">All Types</option>
+              <option value="express">Express</option>
+              <option value="standard">Standard</option>
+            </select>
+          </div>
+          <div class="filter-field">
+            <label for="start-date">Start Date</label>
+            <input
+              type="date"
+              id="start-date"
+              [(ngModel)]="filters.startDate"
+              (ngModelChange)="applyFilters()"
+            />
+          </div>
+          <div class="filter-field">
+            <label for="end-date">End Date</label>
+            <input
+              type="date"
+              id="end-date"
+              [(ngModel)]="filters.endDate"
+              (ngModelChange)="applyFilters()"
+            />
+          </div>
+        </div>
+
+        <div class="active-filters">
+          <div
+            class="filter-chip"
+            *ngFor="let filter of activeFilters"
+            (click)="removeFilter(filter.key)"
+          >
+            {{ filter.value }}
+            <span class="material-icons remove-chip">close</span>
+          </div>
+          <button class="clear-filters" (click)="resetFilters()" *ngIf="activeFilters.length > 0">
+            Clear All Filters
+          </button>
+        </div>
+      </div>
+
+      <!-- History List -->
+      <div class="history-list">
+        <div class="history-item" *ngFor="let entry of filteredHistory" @fadeIn>
+          <div class="history-info">
+            <div class="history-main">
+              <span class="history-id">#{{ entry.id }}</span>
+              <span class="history-date">{{ entry.date | date: 'mediumDate' }}</span>
+            </div>
+            <div class="history-details">
+              <span class="history-type">{{ entry.type | titlecase }}</span>
+              <span class="history-status {{ entry.status }}">{{ entry.status | titlecase }}</span>
+            </div>
+          </div>
+          <div class="history-actions">
+            <button class="view-details" (click)="viewDetails(entry)">
+              <i class="material-icons">visibility</i>
+              View Details
+            </button>
+          </div>
+        </div>
+        <div class="no-results" *ngIf="!filteredHistory.length">
+          <i class="material-icons">info</i>
+          <p>No deliveries found matching your criteria.</p>
+          <button class="reset-search" (click)="resetFilters()">Reset Search</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

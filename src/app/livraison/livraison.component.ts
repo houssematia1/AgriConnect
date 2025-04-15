@@ -20,53 +20,7 @@ export class LivraisonComponent implements OnInit {
   @ViewChild('canvas') canvasElement!: ElementRef<HTMLCanvasElement>;
   @ViewChild('reasonInput') reasonInputElement!: ElementRef<HTMLTextAreaElement>;
 
-  orders: Livraison[] = [
-    {
-      id: 1,
-      statusLivraison: 'EN_COURS',
-      photo: null,
-      reason: null,
-      clientName: 'John Doe',
-      address: '123 Main St',
-      orderDate: new Date()
-    },
-    {
-      id: 2,
-      statusLivraison: 'EN_COURS',
-      photo: null,
-      reason: null,
-      clientName: 'Jane Smith',
-      address: '456 Oak Ave',
-      orderDate: new Date()
-    },
-    {
-      id: 3,
-      statusLivraison: 'EN_COURS',
-      photo: null,
-      reason: null,
-      clientName: 'Bob Johnson',
-      address: '789 Pine Rd',
-      orderDate: new Date()
-    },
-    {
-      id: 4,
-      statusLivraison: 'EN_COURS',
-      photo: null,
-      reason: null,
-      clientName: 'Alice Brown',
-      address: '321 Elm St',
-      orderDate: new Date()
-    },
-    {
-      id: 5,
-      statusLivraison: 'EN_COURS',
-      photo: null,
-      reason: null,
-      clientName: 'Mike Wilson',
-      address: '654 Cedar Ln',
-      orderDate: new Date()
-    }
-  ];
+  commandes: Livraison[] = [];
 
   constructor(
     private livraisonService: LivraisonService,
@@ -93,12 +47,41 @@ export class LivraisonComponent implements OnInit {
   }
 
   loadOrders() {
-    this.livraisonService.getAllLivraisons().subscribe((data) => {
-      this.orders = data;
-      // Optional: Filter orders by userId if your backend supports it
-      // if (this.userId) {
-      //   this.orders = data.filter(order => order.userId === this.userId);
-      // }
+    console.log('Loading commandes from API...');
+    this.livraisonService.getAllLivraisons().subscribe({
+      next: (data) => {
+        console.log('Commandes loaded:', data);
+        // Map the backend data to our component's format
+        this.commandes = data.map(commande => ({
+          ...commande,
+          statusLivraison: commande.statut === 'PENDING' ? 'EN_COURS' : commande.statut,
+          clientName: commande.clientNom
+        }));
+      },
+      error: (error) => {
+        console.error('Error loading commandes:', error);
+        // Fallback to sample data if API fails
+        this.commandes = [
+          {
+            id: 1,
+            statut: 'PENDING',
+            clientNom: 'Jean Dupont',
+            photo: null,
+            reason: null,
+            address: '123 Rue de Paris',
+            orderDate: new Date()
+          },
+          {
+            id: 2,
+            statut: 'PENDING',
+            clientNom: 'Marie Martin',
+            photo: null,
+            reason: null,
+            address: '456 Avenue des Champs-Élysées',
+            orderDate: new Date()
+          }
+        ];
+      }
     });
   }
 
@@ -164,9 +147,9 @@ export class LivraisonComponent implements OnInit {
       canvas.getContext('2d')!.drawImage(video, 0, 0);
 
       const photoData = canvas.toDataURL('image/png');
-      const order = this.orders.find(o => o.id === this.currentOrderId);
+      const order = this.commandes.find(o => o.id === this.currentOrderId);
       if (order) {
-        order.statusLivraison = 'LIVRE';
+        order.statut = 'LIVRE';
         order.photo = photoData;
         this.livraisonService.updateLivraison(order.id, order).subscribe(() => {
           this.loadOrders();
@@ -185,9 +168,9 @@ export class LivraisonComponent implements OnInit {
     if (this.reasonInputElement && this.currentOrderId) {
       const reason = this.reasonInputElement.nativeElement.value.trim();
       if (reason) {
-        const order = this.orders.find(o => o.id === this.currentOrderId);
+        const order = this.commandes.find(o => o.id === this.currentOrderId);
         if (order) {
-          order.statusLivraison = 'NON_LIVRE';
+          order.statut = 'NON_LIVRE';
           order.reason = reason;
           this.livraisonService.updateLivraison(order.id, order).subscribe(() => {
             this.loadOrders();

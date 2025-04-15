@@ -8,6 +8,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 })
 export class ProfileComponent implements OnInit {
   userId: number | null = null;
+  isSidebarCollapsed = false;
   user: any = {
     id: null,
     nom: '',
@@ -15,8 +16,7 @@ export class ProfileComponent implements OnInit {
     email: '',
     numeroDeTelephone: '',
     role: '',
-    adresseLivraison: '',
-    vehicule: ''
+    adresseLivraison: ''
   };
 
   constructor(private route: ActivatedRoute, private router: Router) {}
@@ -27,6 +27,16 @@ export class ProfileComponent implements OnInit {
       this.userId = id ? +id : null;
       this.loadUserProfile();
     });
+  }
+
+  toggleSidebar() {
+    this.isSidebarCollapsed = !this.isSidebarCollapsed;
+  }
+
+  logout() {
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('userEmail');
+    this.router.navigate(['/login']);
   }
 
   loadUserProfile() {
