@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { AuditLog } from 'src/app/audit-log.model';
+
 
 export interface User {
   id: number;
@@ -11,6 +13,7 @@ export interface User {
   numeroDeTelephone: string;
   role: string;
   adresseLivraison?: string;
+  isBlocked: boolean;
 }
 
 @Injectable({
@@ -44,5 +47,21 @@ export class UserService {
 
   searchUsers(query: string): Observable<User[]> {
     return this.http.get<User[]>(`${this.apiUrl}/search?query=${encodeURIComponent(query)}`);
+  }
+  blockUser(id: number, block: boolean): Observable<any> {
+    const url = block
+      ? `${this.apiUrl}/block/${id}`
+      : `${this.apiUrl}/unblock/${id}`;
+    return this.http.put(url, {});
+  
+  }
+  verifyAccount(email: string, code: string) {
+    return this.http.post('http://localhost:8082/api/users/verify', null, {
+      params: { email, code },
+      responseType: 'text'
+    });
+  }
+  getAuditLogs(): Observable<AuditLog[]> {
+    return this.http.get<AuditLog[]>('http://localhost:8082/api/audit-logs');
   }
 }

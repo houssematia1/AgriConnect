@@ -10,6 +10,8 @@ import { LoginComponent } from './login/login.component';
 import { HomeComponent } from './home/home.component';
 import { UserListComponent } from './user-list/user-list.component';
 import { UserEditComponent } from './user-edit/user-edit.component';
+import { UserFormComponent } from './user-form/user-form.component';
+import { VerifyAccountComponent } from './verify-account/verify-account.component';
 
 
 @NgModule({
@@ -20,6 +22,8 @@ import { UserEditComponent } from './user-edit/user-edit.component';
     HomeComponent,
     UserListComponent,
     UserEditComponent,
+    UserFormComponent,
+    VerifyAccountComponent,
   ],
   imports: [
     BrowserModule,

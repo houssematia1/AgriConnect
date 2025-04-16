@@ -14,24 +14,33 @@ export class InscriptionComponent {
     email: '',
     motDePasse: '',
     numeroDeTelephone: '',
-    role: 'user'  
+    role: 'user',
+    adresseLivraison: ''
   };
 
   message: string = '';
 
-  constructor(private userService: UserService,private router: Router ) { }
+  constructor(private userService: UserService, private router: Router) {}
 
   onSubmit(): void {
-    this.userService.registerUser(this.user).subscribe(
-      (response) => {
-        console.log('User registered:', response);
-        // After successful registration, you can proceed to login or other actions.
-        this.router.navigate(['/login']);
+    this.userService.registerUser(this.user).subscribe({
+      next: (response) => {
+        console.log('Utilisateur inscrit avec succès:', response);
+
+        // Rediriger vers la page de vérification avec l'email pré-rempli
+        this.router.navigate(['/verify'], {
+          queryParams: { email: this.user.email }
+        });
       },
-      (error) => {
-        console.error('Error during registration:', error);
-        this.message = 'Erreur lors de l\'inscription';
+      error: (error) => {
+        console.error('Erreur lors de l\'inscription:', error);
+
+        if (error.status === 409) {
+          this.message = '❌ Cet email est déjà utilisé. Veuillez en choisir un autre.';
+        } else {
+          this.message = '❌ Une erreur est survenue lors de l\'inscription.';
+        }
       }
-    );
+    });
   }
 }

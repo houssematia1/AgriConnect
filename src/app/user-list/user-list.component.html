@@ -1,36 +1,94 @@
-<div class="user-cards-container">
-  <h2>Liste des utilisateurs</h2>
-  
-
-  <div class="filter-container">
-    <input
-      type="text"
-      placeholder="Rechercher par nom, prénom ou email..."
-      [(ngModel)]="searchTerm"
-      (ngModelChange)="onSearch()">
-    <select id="roleFilter" [(ngModel)]="selectedRole" (change)="onRoleChange($event)">
-      <option value="all">Tous</option>
-      <option value="admin">Admin</option>
-      <option value="user">Client</option>
-      <option value="agriculteur">Agriculteur</option>
-      <option value="livreur">Livreur</option>
-    </select>
+<div class="layout">
+  <!-- Sidebar -->
+  <div class="sidebar" [class.closed]="!isSidebarOpen">
+    <div class="sidebar-content">
+      <button class="menu-toggle-inside" (click)="toggleSidebar()">☰</button>
+      <h3>Menu</h3>
+      <ul class="menu-links">
+        <li><a routerLink="/">Accueil</a></li>
+        <li><a routerLink="/users">Utilisateurs</a></li>
+        <li><a routerLink="/inscription">Inscription</a></li>
+      </ul>
+    </div>
+    <div class="logout-link">
+      <a (click)="onLogout()">⎋ Se déconnecter</a>
+    </div>
   </div>
-  
-  <div class="cards-grid">
-    <div class="user-card" *ngFor="let user of users">
-      <div class="card-header">
-        <span class="user-id">#{{ user.id }}</span>
+
+  <!-- Contenu principal -->
+  <div class="main-content">
+    <div class="user-list-wrapper">
+      <div class="list-header">
+        <h2>Gestion des Utilisateurs</h2>
+        <button class="btn-primary" (click)="onAddUser()">+ Ajouter</button>
+        <button class="btn logout" (click)="onLogout()">⎋ Déconnexion</button>
       </div>
-      <div class="card-body">
-        <h3 class="user-name">{{ user.nom }} {{ user.prenom }}</h3>
-        <p class="user-email">{{ user.email }}</p>
-        <p class="user-phone">Téléphone : {{ user.numeroDeTelephone }}</p>
-        <p class="user-role">Rôle : {{ user.role }}</p>
+
+      <div class="filters">
+        <input
+          type="text"
+          placeholder="🔍 Rechercher..."
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearch()" />
+          <select [(ngModel)]="selectedRole" (change)="onRoleChange()">
+            <option value="all">Tous les rôles</option>
+            <option value="admin">Admin</option>
+            <option value="user">Client</option>
+            <option value="agriculteur">Agriculteur</option>
+            <option value="livreur">Livreur</option>
+          </select>
       </div>
-      <div class="card-footer">
-        <button type="button" class="btn btn-edit" (click)="onUpdateUser(user)">Edit</button>
-        <button type="button" class="btn btn-delete" (click)="onDeleteUser(user)">Delete</button>
+
+      <div class="table-container">
+        <table class="styled-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Utilisateur</th>
+              <th>Email</th>
+              <th>Rôle</th>
+              <th>État</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of users; index as i">
+              <td>{{ i + 1 }}</td>
+              <td class="user-cell">
+                <img class="avatar"
+                  src="https://ui-avatars.com/api/?name={{ user.nom }}+{{ user.prenom }}&background=0D8ABC&color=fff"
+                  alt="avatar" />
+                <div>
+                  <div class="name">{{ user.nom }} {{ user.prenom }}</div>
+                </div>
+              </td>
+              <td>{{ user.email }}</td>
+              <td><span class="role-badge">{{ user.role }}</span></td>
+              <td>
+                <span [style.color]="user.isBlocked ? 'red' : 'green'">
+                  {{ user.isBlocked ? 'Bloqué' : 'Actif' }}
+                </span>
+              </td>
+              <td>
+                <button class="action-btn edit" (click)="onUpdateUser(user)">Modifier</button>
+                <button class="action-btn delete" (click)="onDeleteUser(user)">Supprimer</button>
+                <button class="action-btn block" *ngIf="!user.isBlocked" (click)="onBlockUser(user)">Bloquer</button>
+                <button class="action-btn unblock" *ngIf="user.isBlocked" (click)="onUnblockUser(user)">Débloquer</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="list-footer">
+        <span>Affichage de {{ users.length }} utilisateurs</span>
+        <div class="pagination">
+          <button (click)="prevPage()" [disabled]="page === 1">←</button>
+          <button *ngFor="let p of pages" [class.active]="p === page" (click)="goToPage(p)">
+            {{ p }}
+          </button>
+          <button (click)="nextPage()" [disabled]="page === pages.length">→</button>
+        </div>
       </div>
     </div>
   </div>

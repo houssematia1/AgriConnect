@@ -20,12 +20,9 @@ export class LoginComponent implements AfterViewInit {
   onSubmit(): void {
     this.userService.login(this.credentials).subscribe(
       (user: any) => {
-        console.log('Login réussi :', user);
-        this.message = 'Login réussi !';
-       
+        this.message = 'Connexion réussie.';
         localStorage.setItem('currentUser', JSON.stringify(user));
-        
-        if (user && user.role && user.role.trim().toLowerCase() === 'admin') {
+        if (user.role && user.role.trim().toLowerCase() === 'admin') {
           this.router.navigate(['/users']);
         } else {
           this.router.navigate(['/']);
@@ -33,7 +30,11 @@ export class LoginComponent implements AfterViewInit {
       },
       (error: any) => {
         console.error('Erreur de login :', error);
-        this.message = 'Erreur de login : ' + error.error;
+        if (error.error && error.error.error) {
+          this.message = error.error.error; // Ex: "Votre compte est bloqué."
+        } else {
+          this.message = 'Erreur inconnue lors de la connexion.';
+        }
       }
     );
   }
