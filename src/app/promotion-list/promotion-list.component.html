@@ -44,12 +44,12 @@
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-600 mb-1">Start Date</label>
             <input type="date" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200" 
-                   [(ngModel)]="newPromotion.dateDebut">
+                   [(ngModel)]="newPromotionStartDate">
           </div>
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-600 mb-1">End Date</label>
             <input type="date" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200" 
-                   [(ngModel)]="newPromotion.dateFin">
+                   [(ngModel)]="newPromotionEndDate">
           </div>
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-600 mb-1">Condition</label>
@@ -82,12 +82,12 @@
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-600 mb-1">Start Date</label>
             <input type="date" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200" 
-                   [(ngModel)]="selectedPromotion.dateDebut">
+                   [(ngModel)]="selectedPromotionStartDate">
           </div>
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-600 mb-1">End Date</label>
             <input type="date" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200" 
-                   [(ngModel)]="selectedPromotion.dateFin">
+                   [(ngModel)]="selectedPromotionEndDate">
           </div>
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-600 mb-1">Condition</label>
@@ -130,6 +130,47 @@
       </div>
     </div>
   
+    <!-- Filter Section -->
+    <div class="bg-white p-6 rounded-xl shadow-lg">
+      <h2 class="text-2xl font-semibold text-gray-700 mb-4">Filter Promotions</h2>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-600 mb-1">Search by Name</label>
+          <input type="text" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                 [(ngModel)]="searchTerm" (ngModelChange)="applyFilters()" placeholder="Enter offer name">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-600 mb-1">Filter by Condition</label>
+          <select class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                  [(ngModel)]="filterCondition" (ngModelChange)="applyFilters()">
+            <option value="">All Conditions</option>
+            <option value="ACHAT_GROUPE">Achat Groupe</option>
+            <option value="MONTANT_MIN">Montant Minimum</option>
+            <option value="EXPIRATION_PRODUIT">Expiration Produit</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-600 mb-1">Start Date (From)</label>
+          <input type="date" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                 [(ngModel)]="filterStartDate" (ngModelChange)="applyFilters()">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-600 mb-1">End Date (To)</label>
+          <input type="date" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                 [(ngModel)]="filterEndDate" (ngModelChange)="applyFilters()">
+        </div>
+      </div>
+      <div class="mt-4">
+        <button (click)="clearFilters()" 
+                class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300 flex items-center space-x-2">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+          <span>Clear Filters</span>
+        </button>
+      </div>
+    </div>
+  
     <!-- Promotion List -->
     <div class="bg-white p-6 rounded-xl shadow-lg">
       <div class="flex justify-between items-center mb-6">
@@ -153,14 +194,82 @@
           </button>
         </div>
       </div>
+  
+      <!-- Export and Bulk Actions -->
+      <div class="flex justify-between mb-4">
+        <div class="flex space-x-3">
+          <button (click)="selectAll()" 
+                  class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300 flex items-center space-x-2">
+            <span>Select All</span>
+          </button>
+          <button (click)="deselectAll()" 
+                  class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300 flex items-center space-x-2">
+            <span>Deselect All</span>
+          </button>
+          <button (click)="bulkActivate()" 
+                  class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300 flex items-center space-x-2"
+                  [disabled]="selectedPromotionIds.size === 0">
+            <span>Activate Selected</span>
+          </button>
+          <button (click)="bulkDeactivate()" 
+                  class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300 flex items-center space-x-2"
+                  [disabled]="selectedPromotionIds.size === 0">
+            <span>Deactivate Selected</span>
+          </button>
+          <button (click)="bulkDelete()" 
+                  class="bg-red-700 hover:bg-red-800 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300 flex items-center space-x-2"
+                  [disabled]="selectedPromotionIds.size === 0">
+            <span>Delete Selected</span>
+          </button>
+        </div>
+        <button (click)="exportPromotionsToCSV()" 
+                class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300 flex items-center space-x-2">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V3"></path>
+          </svg>
+          <span>Export to CSV</span>
+        </button>
+      </div>
+  
       <div class="overflow-x-auto">
         <table class="w-full table-auto">
           <thead class="bg-gray-100">
             <tr>
-              <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">Name</th>
-              <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">Discount (%)</th>
-              <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">Start Date</th>
-              <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">End Date</th>
+              <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">
+                <input type="checkbox" (change)="selectAll()" [checked]="selectedPromotionIds.size === filteredPromotions.length && filteredPromotions.length > 0">
+              </th>
+              <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 cursor-pointer" (click)="sortPromotions('nom')">
+                Name
+                <span *ngIf="sortColumn === 'nom'" class="ml-1">
+                  <svg class="h-4 w-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="sortDirection === 'asc' ? 'M19 9l-7 7-7-7' : 'M5 15l7-7 7 7'"></path>
+                  </svg>
+                </span>
+              </th>
+              <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 cursor-pointer" (click)="sortPromotions('pourcentageReduction')">
+                Discount (%)
+                <span *ngIf="sortColumn === 'pourcentageReduction'" class="ml-1">
+                  <svg class="h-4 w-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="sortDirection === 'asc' ? 'M19 9l-7 7-7-7' : 'M5 15l7-7 7 7'"></path>
+                  </svg>
+                </span>
+              </th>
+              <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 cursor-pointer" (click)="sortPromotions('dateDebut')">
+                Start Date
+                <span *ngIf="sortColumn === 'dateDebut'" class="ml-1">
+                  <svg class="h-4 w-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="sortDirection === 'asc' ? 'M19 9l-7 7-7-7' : 'M5 15l7-7 7 7'"></path>
+                  </svg>
+                </span>
+              </th>
+              <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600 cursor-pointer" (click)="sortPromotions('dateFin')">
+                End Date
+                <span *ngIf="sortColumn === 'dateFin'" class="ml-1">
+                  <svg class="h-4 w-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="sortDirection === 'asc' ? 'M19 9l-7 7-7-7' : 'M5 15l7-7 7 7'"></path>
+                  </svg>
+                </span>
+              </th>
               <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">Condition</th>
               <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">Active</th>
               <th class="px-4 py-3 text-left text-sm font-semibold text-gray-600">Actions</th>
@@ -168,11 +277,14 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let promotion of promotions; let i = index" class="border-b hover:bg-gray-50 transition-all duration-200">
+            <tr *ngFor="let promotion of filteredPromotions; let i = index" class="border-b hover:bg-gray-50 transition-all duration-200">
+              <td class="px-4 py-3">
+                <input type="checkbox" [checked]="promotion.id && selectedPromotionIds.has(promotion.id)" (change)="toggleSelection(promotion.id!)">
+              </td>
               <td class="px-4 py-3 text-gray-700">{{ promotion.nom }}</td>
               <td class="px-4 py-3 text-gray-700">{{ promotion.pourcentageReduction }}</td>
-              <td class="px-4 py-3 text-gray-700">{{ promotion.dateDebut | date }}</td>
-              <td class="px-4 py-3 text-gray-700">{{ promotion.dateFin | date }}</td>
+              <td class="px-4 py-3 text-gray-700">{{ promotion.dateDebut | date:'mediumDate' }}</td>
+              <td class="px-4 py-3 text-gray-700">{{ promotion.dateFin | date:'mediumDate' }}</td>
               <td class="px-4 py-3 text-gray-700">{{ promotion.conditionPromotion }}</td>
               <td class="px-4 py-3">
                 <span class="inline-block px-2 py-1 text-xs font-semibold rounded-full"
