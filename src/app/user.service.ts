@@ -14,6 +14,7 @@ export interface User {
   role: string;
   adresseLivraison?: string;
   isBlocked: boolean;
+  risk_score?: number;
 }
 
 @Injectable({
@@ -63,5 +64,21 @@ export class UserService {
   }
   getAuditLogs(): Observable<AuditLog[]> {
     return this.http.get<AuditLog[]>('http://localhost:8082/api/audit-logs');
+  }
+  requestPasswordReset(email: string): Observable<any> {
+    return this.http.post(`${this.authUrl}/request-password-reset`, null, {
+      params: { email },
+      responseType: 'text'
+    });
+  }
+  
+  resetPassword(email: string, code: string, newPassword: string): Observable<any> {
+    return this.http.post(`${this.authUrl}/reset-password`, null, {
+      params: { email, code, newPassword },
+      responseType: 'text'
+    });
+  }
+  getRiskScore(id: number): Observable<any> {
+    return this.http.get(`http://localhost:8082/api/users/predict/${id}`);
   }
 }

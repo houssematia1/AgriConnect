@@ -1,25 +1,9 @@
 <div class="layout">
-  <!-- Sidebar -->
-  <div class="sidebar" [class.closed]="!isSidebarOpen">
-    <div class="sidebar-content">
-      <button class="menu-toggle-inside" (click)="toggleSidebar()">☰</button>
-      <h3>Menu</h3>
-      <ul class="menu-links">
-        <li><a routerLink="/">Accueil</a></li>
-        <li><a routerLink="/users">Utilisateurs</a></li>
-        <li><a routerLink="/inscription">Inscription</a></li>
-      </ul>
-    </div>
-    <div class="logout-link">
-      <a (click)="onLogout()">⎋ Se déconnecter</a>
-    </div>
-  </div>
-
   <!-- Contenu principal -->
   <div class="main-content">
     <div class="user-list-wrapper">
       <div class="list-header">
-        <h2>Gestion des Utilisateurs</h2>
+        <h2>AgriConnect 🌱</h2>
         <button class="btn-primary" (click)="onAddUser()">+ Ajouter</button>
         <button class="btn logout" (click)="onLogout()">⎋ Déconnexion</button>
       </div>
@@ -30,13 +14,13 @@
           placeholder="🔍 Rechercher..."
           [(ngModel)]="searchTerm"
           (ngModelChange)="onSearch()" />
-          <select [(ngModel)]="selectedRole" (change)="onRoleChange()">
-            <option value="all">Tous les rôles</option>
-            <option value="admin">Admin</option>
-            <option value="user">Client</option>
-            <option value="agriculteur">Agriculteur</option>
-            <option value="livreur">Livreur</option>
-          </select>
+        <select [(ngModel)]="selectedRole" (change)="onRoleChange()">
+          <option value="all">Tous les rôles</option>
+          <option value="admin">Admin</option>
+          <option value="user">Client</option>
+          <option value="agriculteur">Agriculteur</option>
+          <option value="livreur">Livreur</option>
+        </select>
       </div>
 
       <div class="table-container">
@@ -48,6 +32,7 @@
               <th>Email</th>
               <th>Rôle</th>
               <th>État</th>
+              <th>Risque IA</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -56,8 +41,8 @@
               <td>{{ i + 1 }}</td>
               <td class="user-cell">
                 <img class="avatar"
-                  src="https://ui-avatars.com/api/?name={{ user.nom }}+{{ user.prenom }}&background=0D8ABC&color=fff"
-                  alt="avatar" />
+                     src="https://ui-avatars.com/api/?name={{ user.nom }}+{{ user.prenom }}&background=0D8ABC&color=fff"
+                     alt="avatar" />
                 <div>
                   <div class="name">{{ user.nom }} {{ user.prenom }}</div>
                 </div>
@@ -68,6 +53,17 @@
                 <span [style.color]="user.isBlocked ? 'red' : 'green'">
                   {{ user.isBlocked ? 'Bloqué' : 'Actif' }}
                 </span>
+              </td>
+              <td>
+                <span *ngIf="user.risk_score !== undefined"
+                      [ngStyle]="{
+                        color: user.risk_score >= 70 ? 'red' :
+                               user.risk_score >= 40 ? 'orange' : 'green',
+                        fontWeight: 'bold'
+                      }">
+                  {{ user.risk_score }} %
+                </span>
+                <span *ngIf="user.risk_score === undefined">⏳</span>
               </td>
               <td>
                 <button class="action-btn edit" (click)="onUpdateUser(user)">Modifier</button>

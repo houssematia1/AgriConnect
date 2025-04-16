@@ -37,9 +37,25 @@ export class UserListComponent implements OnInit {
     this.userService.getUsers().subscribe(users => {
       this.allUsers = users;
       this.totalUsers = users.length;
+  
+      // Charger les scores IA pour chaque utilisateur
+      users.forEach(user => {
+        this.userService.getRiskScore(user.id).subscribe({
+          next: res => {
+            user.risk_score = res.risk_score;
+            this.applyFilters(); // Re-filtrer après réception du score
+          },
+          error: () => {
+            user.risk_score = undefined;
+            this.applyFilters();
+          }
+        });
+      });
+  
       this.applyFilters();
     });
   }
+  
 
   applyFilters(): void {
     let filtered = [...this.allUsers];
