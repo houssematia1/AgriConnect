@@ -11,6 +11,8 @@ import { BrowserModule } from '@angular/platform-browser';
  import { UserListComponent } from './user-list/user-list.component';
  import { UserEditComponent } from './user-edit/user-edit.component';
  import { PromotionListComponent } from './promotion-list/promotion-list.component';
+ import { NgChartsModule} from 'ng2-charts'; // Import ChartsModule
+ import { MatSnackBarModule } from '@angular/material/snack-bar';
  
  
  @NgModule({
@@ -28,7 +30,9 @@ import { BrowserModule } from '@angular/platform-browser';
      FormsModule,
      ReactiveFormsModule,  // IMPORTANT : Pour utiliser [formGroup] dans UserEditComponent
      HttpClientModule,
-     AppRoutingModule
+     AppRoutingModule,
+     NgChartsModule
+   
    ],
    providers: [],
    bootstrap: [AppComponent]
