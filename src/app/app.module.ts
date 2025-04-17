@@ -14,6 +14,8 @@ import { UserEditComponent } from './user-edit/user-edit.component';
 import { LivraisonComponent } from './livraison/livraison.component';
 import { ProfileComponent } from './profile/profile.component';
 import { HistoriqueComponent } from './historique/historique.component';
+import { GoogleMapsComponent } from './google-maps/google-maps.component';
+import {AgmCoreModule} from "@agm/core";
 
 @NgModule({
   declarations: [
@@ -26,6 +28,7 @@ import { HistoriqueComponent } from './historique/historique.component';
     LivraisonComponent,
     ProfileComponent,
     HistoriqueComponent,
+    GoogleMapsComponent,
   ],
   imports: [
     BrowserModule,
@@ -33,7 +36,10 @@ import { HistoriqueComponent } from './historique/historique.component';
     ReactiveFormsModule,
     HttpClientModule,
     AppRoutingModule,
-    BrowserAnimationsModule
+    BrowserAnimationsModule,
+    AgmCoreModule.forRoot({
+      apiKey: 'AIzaSyCH-qIi6RzomB2m3iW1nAZzRYXQG1yxU3Y'
+    })
   ],
   providers: [],
   bootstrap: [AppComponent]
