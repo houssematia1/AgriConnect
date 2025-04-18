@@ -7,8 +7,8 @@ interface Promotion {
   id: number;
   nom: string;
   pourcentageReduction: number;
-  dateDebut: Date;
-  dateFin: Date;
+  dateDebut: Date | string;
+  dateFin: Date | string;
   conditionPromotion: string;
   active: boolean;
   produits?: any[];
@@ -41,15 +41,18 @@ export class PromotionListComponent implements OnInit {
     dateDebut: new Date(),
     dateFin: new Date(),
     conditionPromotion: '',
-    active: true
+    active: true,
+    produits: []
   };
   editMode = false;
   selectedPromotion: Promotion | null = null;
-  montant: number = 0;
-  appliedMontant: number | null = null;
   showingActiveOnly = false;
   successMessage: string | null = null;
   errorMessage: string | null = null;
+
+  // Use plain objects instead of Maps for template binding
+  promotionAmounts: { [key: number]: number } = {};
+  appliedMontants: { [key: number]: number | null } = {};
 
   searchTerm: string = '';
   filterCondition: string = '';
@@ -91,7 +94,9 @@ export class PromotionListComponent implements OnInit {
         console.log('Promotions loaded successfully:', data);
         this.promotions = data.map(promo => ({
           ...promo,
-          id: Number(promo.id)
+          id: Number(promo.id),
+          dateDebut: new Date(promo.dateDebut),
+          dateFin: new Date(promo.dateFin)
         }));
         this.promotions.forEach(promo => {
           console.log(`Promotion ID: ${promo.id}, Type: ${typeof promo.id}, Data:`, promo);
@@ -120,7 +125,9 @@ export class PromotionListComponent implements OnInit {
         console.log('Active promotions loaded successfully:', data);
         this.promotions = data.map(promo => ({
           ...promo,
-          id: Number(promo.id)
+          id: Number(promo.id),
+          dateDebut: new Date(promo.dateDebut),
+          dateFin: new Date(promo.dateFin)
         }));
         this.promotions.forEach(promo => {
           console.log(`Active Promotion ID: ${promo.id}, Type: ${typeof promo.id}, Data:`, promo);
@@ -137,16 +144,24 @@ export class PromotionListComponent implements OnInit {
   }
 
   addPromotion(): void {
-    console.log('addPromotion called with payload:', JSON.stringify(this.newPromotion));
-    if (!this.validatePromotion(this.newPromotion)) {
-      return;
-    }
-    this.http.post<Promotion>(`${this.apiUrl}/add`, this.newPromotion, {
-      headers: { 'Content-Type': 'application/json' }
+    // Crée une copie sans l'ID
+    const { id, ...promotionSansId } = this.newPromotion;
+    
+    const payload = {
+      ...promotionSansId,
+      dateDebut: this.formatDateForInput(promotionSansId.dateDebut),
+      dateFin: this.formatDateForInput(promotionSansId.dateFin)
+    };
+  
+    this.http.post<Promotion>(`${this.apiUrl}/add`, payload, {
+      headers: { 'Content-Type': 'application/json' },
+      withCredentials: true
     }).subscribe(
       promotion => {
         console.log('Add response:', promotion);
         promotion.id = Number(promotion.id);
+        promotion.dateDebut = new Date(promotion.dateDebut);
+        promotion.dateFin = new Date(promotion.dateFin);
         this.promotions.push(promotion);
         this.resetForm();
         this.applyFilters();
@@ -155,12 +170,18 @@ export class PromotionListComponent implements OnInit {
       },
       error => {
         console.error('Error adding promotion:', error);
-        this.errorMessage = `Failed to add promotion. Status: ${error.status}, Message: ${error.error?.error || error.message}`;
+        this.errorMessage = this.extractErrorMessage(error);
         this.clearMessages();
       }
     );
   }
-
+  
+  private extractErrorMessage(error: any): string {
+    if (error.error?.message) {
+      return error.error.message;
+    }
+    return `Failed to add promotion. Status: ${error.status}`;
+  }
   editPromotion(promotion: Promotion): void {
     console.log('editPromotion called with promotion:', promotion);
     this.editMode = true;
@@ -178,10 +199,17 @@ export class PromotionListComponent implements OnInit {
       this.clearMessages();
       return;
     }
-    this.http.put<Promotion>(`${this.apiUrl}/${id}`, this.selectedPromotion).subscribe(
+    const payload = {
+      ...this.selectedPromotion,
+      dateDebut: this.formatDateForInput(this.selectedPromotion.dateDebut),
+      dateFin: this.formatDateForInput(this.selectedPromotion.dateFin)
+    };
+    this.http.put<Promotion>(`${this.apiUrl}/${id}`, payload).subscribe(
       updatedPromotion => {
         console.log('Update response:', updatedPromotion);
         updatedPromotion.id = Number(updatedPromotion.id);
+        updatedPromotion.dateDebut = new Date(updatedPromotion.dateDebut);
+        updatedPromotion.dateFin = new Date(updatedPromotion.dateFin);
         const index = this.promotions.findIndex(p => p.id === updatedPromotion.id);
         if (index !== -1) {
           this.promotions[index] = updatedPromotion;
@@ -223,28 +251,29 @@ export class PromotionListComponent implements OnInit {
   }
 
   applyPromotion(id: number): void {
-    console.log('applyPromotion called with ID:', id, 'and montant:', this.montant);
+    console.log('applyPromotion called with ID:', id);
     if (!this.isValidId(id)) {
       this.errorMessage = 'Invalid promotion ID.';
       this.clearMessages();
       return;
     }
-    if (this.montant <= 0) {
-      this.errorMessage = 'Amount must be greater than 0.';
+    const montant = this.promotionAmounts[id] || 0;
+    if (montant <= 0) {
+      this.errorMessage = `Amount for promotion ID ${id} must be greater than 0.`;
       this.clearMessages();
       return;
     }
-    this.http.get<number>(`${this.apiUrl}/appliquer/${id}/${this.montant}`).subscribe(
+    this.http.get<number>(`${this.apiUrl}/appliquer/${id}/${montant}`).subscribe(
       newMontant => {
         console.log('Promotion applied successfully, new montant:', newMontant);
-        this.appliedMontant = newMontant;
-        this.successMessage = 'Promotion applied successfully!';
+        this.appliedMontants[id] = newMontant;
+        this.successMessage = `Promotion ID ${id} applied successfully!`;
         this.loadAnalytics();
         this.clearMessages();
       },
       error => {
         console.error('Error applying promotion:', error);
-        this.errorMessage = `Failed to apply promotion. Status: ${error.status}, Message: ${error.error?.error || error.message}`;
+        this.errorMessage = `Failed to apply promotion ID ${id}. Status: ${error.status}, Message: ${error.error?.error || error.message}`;
         this.clearMessages();
       }
     );
@@ -282,7 +311,8 @@ export class PromotionListComponent implements OnInit {
       dateDebut: new Date(),
       dateFin: new Date(),
       conditionPromotion: '',
-      active: true
+      active: true,
+      produits: []
     };
   }
 
@@ -347,10 +377,12 @@ export class PromotionListComponent implements OnInit {
       const valueA = a[column];
       const valueB = b[column];
 
-      if (valueA instanceof Date && valueB instanceof Date) {
+      if ((valueA instanceof Date || typeof valueA === 'string') && (valueB instanceof Date || typeof valueB === 'string')) {
+        const dateA = new Date(valueA);
+        const dateB = new Date(valueB);
         return this.sortDirection === 'asc'
-          ? valueA.getTime() - valueB.getTime()
-          : valueB.getTime() - valueA.getTime();
+          ? dateA.getTime() - dateB.getTime()
+          : dateB.getTime() - dateA.getTime();
       }
 
       if (typeof valueA === 'string' && typeof valueB === 'string') {
@@ -495,8 +527,8 @@ export class PromotionListComponent implements OnInit {
         promotion.id,
         `"${promotion.nom}"`,
         promotion.pourcentageReduction,
-        format(promotion.dateDebut, 'yyyy-MM-dd'),
-        format(promotion.dateFin, 'yyyy-MM-dd'),
+        format(new Date(promotion.dateDebut), 'yyyy-MM-dd'),
+        format(new Date(promotion.dateFin), 'yyyy-MM-dd'),
         promotion.conditionPromotion,
         promotion.active ? 'Yes' : 'No'
       ];
@@ -529,8 +561,14 @@ export class PromotionListComponent implements OnInit {
       return false;
     }
 
-    if (promotion.dateDebut > promotion.dateFin) {
+    if (new Date(promotion.dateDebut) > new Date(promotion.dateFin)) {
       this.errorMessage = 'End date must be after start date.';
+      this.clearMessages();
+      return false;
+    }
+
+    if (!promotion.conditionPromotion) {
+      this.errorMessage = 'Condition is required.';
       this.clearMessages();
       return false;
     }
@@ -538,8 +576,8 @@ export class PromotionListComponent implements OnInit {
     return true;
   }
 
-  formatDateForInput(date: Date): string {
-    return format(date, 'yyyy-MM-dd');
+  formatDateForInput(date: Date | string): string {
+    return format(new Date(date), 'yyyy-MM-dd');
   }
 
   parseDateFromInput(dateString: string): Date {
@@ -621,6 +659,8 @@ export class PromotionListComponent implements OnInit {
       updatedPromotion => {
         console.log('AI suggestion accepted, updated promotion:', updatedPromotion);
         updatedPromotion.id = Number(updatedPromotion.id);
+        updatedPromotion.dateDebut = new Date(updatedPromotion.dateDebut);
+        updatedPromotion.dateFin = new Date(updatedPromotion.dateFin);
         const index = this.promotions.findIndex(p => p.id === updatedPromotion.id);
         if (index !== -1) {
           this.promotions[index] = updatedPromotion;

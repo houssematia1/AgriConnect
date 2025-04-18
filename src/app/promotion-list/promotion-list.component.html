@@ -247,27 +247,38 @@
               <td class="p-3 border-b">{{ promotion.dateFin | date:'yyyy-MM-dd' }}</td>
               <td class="p-3 border-b">{{ promotion.conditionPromotion }}</td>
               <td class="p-3 border-b">{{ promotion.active ? 'Yes' : 'No' }}</td>
-              <td class="p-3 border-b flex space-x-2">
-                <button (click)="editPromotion(promotion)" 
-                        class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-2 rounded-lg shadow-md transition-all duration-300">
-                  Edit
-                </button>
-                <button (click)="deletePromotion(promotion.id)" 
-                        class="bg-red-500 hover:bg-red-600 text-white font-semibold py-1 px-2 rounded-lg shadow-md transition-all duration-300">
-                  Delete
-                </button>
-                <button *ngIf="isAISuggested(promotion)" (click)="acceptAISuggestion(promotion.id)" 
-                        class="bg-green-500 hover:bg-green-600 text-white font-semibold py-1 px-2 rounded-lg shadow-md transition-all duration-300">
-                  Accept
-                </button>
-                <button *ngIf="isAISuggested(promotion)" (click)="rejectAISuggestion(promotion.id)" 
-                        class="bg-red-500 hover:bg-red-600 text-white font-semibold py-1 px-2 rounded-lg shadow-md transition-all duration-300">
-                  Reject
-                </button>
-                <button (click)="applyPromotion(promotion.id)" 
-                        class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-1 px-2 rounded-lg shadow-md transition-all duration-300">
-                  Apply
-                </button>
+              <td class="p-3 border-b flex flex-col space-y-2">
+                <div class="flex space-x-2">
+                  <button (click)="editPromotion(promotion)" 
+                          class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-2 rounded-lg shadow-md transition-all duration-300">
+                    Edit
+                  </button>
+                  <button (click)="deletePromotion(promotion.id)" 
+                          class="bg-red-500 hover:bg-red-600 text-white font-semibold py-1 px-2 rounded-lg shadow-md transition-all duration-300">
+                    Delete
+                  </button>
+                  <button *ngIf="isAISuggested(promotion)" (click)="acceptAISuggestion(promotion.id)" 
+                          class="bg-green-500 hover:bg-green-600 text-white font-semibold py-1 px-2 rounded-lg shadow-md transition-all duration-300">
+                    Accept
+                  </button>
+                  <button *ngIf="isAISuggested(promotion)" (click)="rejectAISuggestion(promotion.id)" 
+                          class="bg-red-500 hover:bg-red-600 text-white font-semibold py-1 px-2 rounded-lg shadow-md transition-all duration-300">
+                    Reject
+                  </button>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <input type="number" class="w-32 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                         [(ngModel)]="promotionAmounts[promotion.id]" placeholder="Enter amount" min="0">
+                  <button (click)="applyPromotion(promotion.id)" 
+                          class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-1 px-2 rounded-lg shadow-md transition-all duration-300"
+                          [disabled]="!(promotionAmounts[promotion.id] > 0)">
+                    Apply
+                  </button>
+                </div>
+                <p *ngIf="appliedMontants[promotion.id] !== null && appliedMontants[promotion.id] !== undefined" 
+                   class="text-gray-600 text-sm">
+                  New Amount: {{ appliedMontants[promotion.id] }}
+                </p>
               </td>
             </tr>
           </tbody>
@@ -275,16 +286,6 @@
         <ng-template #noData>
           <p class="text-center text-gray-500 p-4">No promotions available. Please add a promotion or check the API connection.</p>
         </ng-template>
-      </div>
-      <div class="mt-4 flex items-center space-x-2">
-        <input type="number" class="w-48 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-               [(ngModel)]="montant" placeholder="Enter amount" min="0">
-        <button *ngIf="selectedPromotion" (click)="applyPromotion(selectedPromotion.id)" 
-                class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300"
-                [disabled]="montant <= 0">
-          Apply Promotion
-        </button>
-        <p *ngIf="appliedMontant !== null" class="text-gray-600">New Amount: {{ appliedMontant }}</p>
       </div>
     </div>
 
