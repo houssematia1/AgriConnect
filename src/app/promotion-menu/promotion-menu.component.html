@@ -1,0 +1,28 @@
+<div class="menu-container">
+    <!-- Bannière avec image -->
+    <div class="relative h-48 rounded-lg mb-6 banner overflow-hidden">
+      <img src="/assets/images/agri-promo-banner.jpg" 
+           alt="Bannière de promotion agricole avec des produits frais" 
+           class="w-full h-full object-cover"
+           (error)="onImageError($event)"
+           (load)="onImageLoad($event)">
+      <div class="absolute inset-0 bg-black bg-opacity-40 rounded-lg flex items-center justify-center">
+        <div class="text-center text-white banner-text">
+          <h1 class="text-3xl font-bold">Bienvenue chez AgriPromo</h1>
+          <p class="text-lg">Les meilleures promotions pour vos produits agricoles !</p>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Menu de navigation -->
+    <nav class="bg-white shadow-md rounded-lg p-4">
+      <ul class="flex space-x-4 justify-center">
+        <li *ngFor="let link of navLinks">
+          <a [routerLink]="link.path" 
+             class="text-blue-600 hover:text-blue-800 font-semibold transition-colors">
+            {{ link.label }}
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>

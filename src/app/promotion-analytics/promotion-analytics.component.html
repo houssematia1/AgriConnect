@@ -1,0 +1,71 @@
+<div class="container mx-auto p-6">
+    <!-- En-tête -->
+    <div class="flex items-center mb-6 gap-2">
+      <mat-icon class="text-blue-500">analytics</mat-icon>
+      <h2 class="text-2xl font-bold">Analyse des Promotions</h2>
+    </div>
+  
+    <!-- État de chargement -->
+    <div *ngIf="isLoading" class="text-center p-8 bg-white rounded-lg shadow">
+      <mat-spinner diameter="40" class="mx-auto"></mat-spinner>
+      <p class="mt-4 text-gray-600">Chargement des données...</p>
+    </div>
+  
+    <!-- Message d'erreur -->
+    <div *ngIf="errorMessage && !isLoading" 
+         class="p-4 mb-6 bg-red-50 text-red-700 rounded-lg flex items-center gap-2 animate__animated animate__fadeIn">
+      <mat-icon>error</mat-icon>
+      {{ errorMessage }}
+    </div>
+  
+    <!-- Affichage des données -->
+    <div *ngIf="!isLoading && !errorMessage" class="bg-white rounded-lg shadow p-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Graphique -->
+        <div>
+          <h3 class="text-lg font-semibold mb-4">Répartition des promotions</h3>
+          <div *ngIf="isChartDataEmpty" 
+               class="text-center text-gray-500 mb-4">
+            <p>Aucune donnée de répartition disponible. Les promotions peuvent avoir été appliquées sans données de répartition.</p>
+          </div>
+          <canvas baseChart
+            [data]="barChartData"
+            [options]="barChartOptions"
+            type="bar"
+            height="200">
+          </canvas>
+        </div>
+  
+        <!-- Statistiques -->
+        <div class="grid grid-cols-2 gap-4">
+          <div class="p-4 bg-blue-50 rounded-lg">
+            <div class="text-3xl font-bold text-blue-600">
+              {{ totalPromotions }}
+            </div>
+            <div class="text-sm text-gray-600">Promotions totales</div>
+          </div>
+  
+          <div class="p-4 bg-green-50 rounded-lg">
+            <div class="text-3xl font-bold text-green-600">
+              {{ activePromotions }}
+            </div>
+            <div class="text-sm text-gray-600">Promotions actives</div>
+          </div>
+  
+          <div class="p-4 bg-red-50 rounded-lg">
+            <div class="text-3xl font-bold text-red-600">
+              {{ expiredPromotions }}
+            </div>
+            <div class="text-sm text-gray-600">Promotions expirées</div>
+          </div>
+  
+          <div class="p-4 bg-purple-50 rounded-lg">
+            <div class="text-3xl font-bold text-purple-600">
+              {{ totalPromotionsApplied }}
+            </div>
+            <div class="text-sm text-gray-600">Applications totales</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

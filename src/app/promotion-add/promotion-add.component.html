@@ -1,0 +1,119 @@
+<div class="container mx-auto p-6">
+    <!-- Success/Error Messages -->
+    <div *ngIf="successMessage" class="mb-4 p-4 bg-green-100 text-green-700 rounded-lg flex items-center animate__animated animate__fadeIn">
+      <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+      </svg>
+      {{ successMessage }}
+    </div>
+    <div *ngIf="errorMessage" class="mb-4 p-4 bg-red-100 text-red-700 rounded-lg flex items-center animate__animated animate__fadeIn">
+      <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+      </svg>
+      {{ errorMessage }}
+    </div>
+  
+    <!-- Add Promotion Form -->
+    <div class="mb-8 p-6 bg-white shadow-md rounded-lg animate__animated animate__fadeIn">
+      <h2 class="text-xl font-bold mb-4">Ajouter une promotion</h2>
+      <form #promotionForm="ngForm" (ngSubmit)="addPromotion()" class="space-y-4">
+        <div class="flex flex-col">
+          <label class="text-sm font-medium text-gray-600 mb-1" for="nom">Nom de l’offre</label>
+          <input
+            id="nom"
+            type="text"
+            [(ngModel)]="newPromotion.nom"
+            name="nom"
+            class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            placeholder="Entrez le nom de l’offre"
+            required
+            aria-required="true"
+          />
+        </div>
+        <div class="flex flex-col">
+          <label class="text-sm font-medium text-gray-600 mb-1" for="pourcentageReduction">Réduction (%)</label>
+          <input
+            id="pourcentageReduction"
+            type="number"
+            [(ngModel)]="newPromotion.pourcentageReduction"
+            name="pourcentageReduction"
+            class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            placeholder="Entrez le pourcentage de réduction"
+            min="0"
+            max="100"
+            required
+            aria-required="true"
+          />
+        </div>
+        <div class="flex flex-col">
+          <label class="text-sm font-medium text-gray-600 mb-1" for="dateDebut">Date de début</label>
+          <input
+            id="dateDebut"
+            type="date"
+            [(ngModel)]="newPromotionStartDate"
+            name="dateDebut"
+            class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            required
+            aria-required="true"
+          />
+        </div>
+        <div class="flex flex-col">
+          <label class="text-sm font-medium text-gray-600 mb-1" for="dateFin">Date de fin</label>
+          <input
+            id="dateFin"
+            type="date"
+            [(ngModel)]="newPromotionEndDate"
+            name="dateFin"
+            class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            required
+            aria-required="true"
+          />
+        </div>
+        <div class="flex flex-col">
+          <label class="text-sm font-medium text-gray-600 mb-1" for="conditionPromotion">Condition</label>
+          <input
+            id="conditionPromotion"
+            type="text"
+            [(ngModel)]="newPromotion.conditionPromotion"
+            name="conditionPromotion"
+            class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            placeholder="Entrez la condition"
+            required
+            aria-required="true"
+          />
+        </div>
+        <div class="flex items-center">
+          <input
+            id="active"
+            type="checkbox"
+            [(ngModel)]="newPromotion.active"
+            name="active"
+            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            [attr.aria-checked]="newPromotion.active"
+          />
+          <label for="active" class="ml-2 text-sm font-medium text-gray-600">Active</label>
+        </div>
+        <div class="flex space-x-4">
+          <button
+            type="submit"
+            class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg"
+            [disabled]="!promotionForm.valid || isLoading"
+            matTooltip="Ajouter une nouvelle promotion"
+            aria-label="Ajouter la promotion"
+          >
+            Ajouter
+          </button>
+          <button
+            type="button"
+            (click)="resetForm()"
+            class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg"
+            [disabled]="isLoading"
+            matTooltip="Réinitialiser le formulaire"
+            aria-label="Réinitialiser le formulaire"
+          >
+            Réinitialiser
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
