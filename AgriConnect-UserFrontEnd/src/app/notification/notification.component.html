@@ -1,0 +1,10 @@
+<h2>Notifications</h2>
+<div class="notification-list">
+  <div *ngFor="let notif of notifications" class="notification-item">
+    <div class="notification-header">
+      <span class="notification-type">{{ notif.type }}</span>
+      <span class="notification-time">{{ notif.timestamp | date:'short' }}</span>
+    </div>
+    <div class="notification-content">{{ notif.content }}</div>
+  </div>
+</div>

@@ -1,0 +1,33 @@
+.notification-list {
+  max-width: 600px;
+  margin: 20px auto;
+}
+
+.notification-item {
+  background: #f5f5f5;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 0.9em;
+}
+
+.notification-type {
+  font-weight: bold;
+  color: #2196F3;
+}
+
+.notification-time {
+  color: #666;
+}
+
+.notification-content {
+  color: #333;
+  line-height: 1.5;
+}

@@ -1,0 +1,87 @@
+<!-- src/app/produit/produit.component.html -->
+<div class="container my-4">
+  <h2 class="mb-4">Gestion des Produits</h2>
+  <form [formGroup]="produitForm" (ngSubmit)="onSubmit()" class="row g-3 bg-light p-4 rounded shadow-sm">
+    <div class="col-md-6">
+      <label class="form-label">Nom du produit</label>
+      <input type="text" formControlName="nom" class="form-control">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Prix</label>
+      <input type="number" formControlName="prix" class="form-control">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Devise</label>
+      <select formControlName="devise" class="form-select">
+        <option value="TND">TND</option>
+        <option value="EUR">EUR</option>
+        <option value="USD">USD</option>
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Catégorie</label>
+      <select formControlName="categorie" class="form-select">
+        <option value="Fruits">Fruits</option>
+        <option value="Légumes">Légumes</option>
+        <option value="Céréales">Céréales</option>
+        <option value="Légumineuses">Légumineuses</option>
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Stock</label>
+      <input type="number" formControlName="stock" class="form-control">
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Seuil Minimum</label>
+      <input type="number" formControlName="seuilMin" class="form-control">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Date Expiration</label>
+      <input type="date" formControlName="dateExpiration" class="form-control">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Fournisseur</label>
+      <input type="text" formControlName="fournisseur" class="form-control">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Auto Réapprovisionnement</label>
+      <select formControlName="autoReapprovisionnement" class="form-select">
+        <option [value]="true">Oui</option>
+        <option [value]="false">Non</option>
+      </select>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Quantité Réapprovisionnement</label>
+      <input type="number" formControlName="quantiteReapprovisionnement" class="form-control">
+    </div>
+    <div class="col-12 text-end">
+      <button type="submit" class="btn btn-primary">
+        {{ produitForm.value.id ? 'Modifier' : 'Ajouter' }} le Produit
+      </button>
+    </div>
+  </form>
+  <hr class="my-4">
+  <h3 class="mb-3">Liste des produits</h3>
+  <div *ngIf="produits.length > 0; else vide">
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+      <div class="col" *ngFor="let produit of produits">
+        <div class="card h-100">
+          <div class="card-body">
+            <h5 class="card-title">{{ produit.nom }}</h5>
+            <p class="card-text">Prix: {{ produit.prix }} {{ produit.devise }}</p>
+            <p class="card-text">Stock: {{ produit.stock }}</p>
+            <p class="card-text">Catégorie: {{ produit.categorie }}</p>
+            <p class="card-text">Fournisseur: {{ produit.fournisseur }}</p>
+            <div class="d-flex justify-content-between">
+              <button class="btn btn-warning btn-sm" (click)="chargerProduit(produit)">Modifier</button>
+              <button class="btn btn-danger btn-sm" (click)="supprimerProduit(produit.id)">Supprimer</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <ng-template #vide>
+    <p class="text-muted">Aucun produit trouvé.</p>
+  </ng-template>
+</div>

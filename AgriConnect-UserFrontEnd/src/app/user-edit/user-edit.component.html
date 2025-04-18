@@ -1,0 +1,39 @@
+<div class="edit-user-container">
+  <h2>Edit User</h2>
+  <!-- Affichage d'un message si aucun utilisateur n'est trouvé -->
+  <div *ngIf="!user" class="no-user-message">
+    <p>Aucun utilisateur trouvé pour l'ID {{ userId }}.</p>
+  </div>
+  <!-- Sinon, affichage du formulaire -->
+  <form *ngIf="user" [formGroup]="userForm" (ngSubmit)="onSubmit()" class="edit-user-form">
+    <div class="form-group">
+      <label for="nom">Nom:</label>
+      <input id="nom" type="text" formControlName="nom" placeholder="Entrez le nom">
+    </div>
+    <div class="form-group">
+      <label for="prenom">Prénom:</label>
+      <input id="prenom" type="text" formControlName="prenom" placeholder="Entrez le prénom">
+    </div>
+    <div class="form-group">
+      <label for="email">Email:</label>
+      <input id="email" type="email" formControlName="email" placeholder="Entrez l'email">
+    </div>
+    <div class="form-group">
+      <label for="motDePasse">Mot de Passe:</label>
+      <input id="motDePasse" type="password" formControlName="motDePasse" placeholder="Entrez le mot de passe">
+    </div>
+    <div class="form-group">
+      <label for="numeroDeTelephone">Numéro de Téléphone:</label>
+      <input id="numeroDeTelephone" type="text" formControlName="numeroDeTelephone" placeholder="Entrez le numéro">
+    </div>
+    <div class="form-group">
+      <label for="role">Rôle:</label>
+      <input id="role" type="text" formControlName="role" placeholder="Entrez le rôle">
+    </div>
+    <div class="form-group">
+      <label for="adresseLivraison">Adresse de Livraison:</label>
+      <input id="adresseLivraison" type="text" formControlName="adresseLivraison" placeholder="Entrez l'adresse">
+    </div>
+    <button type="submit" class="btn-submit">Save</button>
+  </form>
+</div>
