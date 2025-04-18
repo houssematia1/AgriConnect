@@ -1,0 +1,157 @@
+<div class="container mt-5">
+  <h2>Créer un Produit</h2>
+  <form (ngSubmit)="onSubmit()" #produitForm="ngForm">
+    <div class="mb-3">
+      <label for="nom" class="form-label">Nom</label>
+      <input
+        type="text"
+        class="form-control"
+        id="nom"
+        name="nom"
+        [(ngModel)]="produit.nom"
+        required
+        #nom="ngModel"
+        [ngClass]="{'is-invalid': nom.invalid && nom.touched}"
+      />
+      <div class="invalid-feedback" *ngIf="nom.invalid && nom.touched">
+        Le nom est requis.
+      </div>
+    </div>
+    <div class="mb-3">
+      <label for="description" class="form-label">Description</label>
+      <textarea
+        class="form-control"
+        id="description"
+        name="description"
+        [(ngModel)]="produit.description"
+      ></textarea>
+    </div>
+    <div class="mb-3">
+      <label for="prix" class="form-label">Prix</label>
+      <input
+        type="number"
+        step="0.01"
+        class="form-control"
+        id="prix"
+        name="prix"
+        [(ngModel)]="produit.prix"
+        required
+        min="0"
+        #prix="ngModel"
+        [ngClass]="{'is-invalid': prix.invalid && prix.touched}"
+      />
+      <div class="invalid-feedback" *ngIf="prix.invalid && prix.touched">
+        Le prix doit être supérieur ou égal à 0.
+      </div>
+    </div>
+    <div class="mb-3">
+      <label for="devise" class="form-label">Devise</label>
+      <input
+        type="text"
+        maxlength="3"
+        class="form-control"
+        id="devise"
+        name="devise"
+        [(ngModel)]="produit.devise"
+        placeholder="ex: XAF"
+      />
+    </div>
+    <div class="mb-3">
+      <label for="taxe" class="form-label">Taxe</label>
+      <input
+        type="number"
+        step="0.01"
+        class="form-control"
+        id="taxe"
+        name="taxe"
+        [(ngModel)]="produit.taxe"
+        min="0"
+      />
+    </div>
+    <div class="mb-3">
+      <label for="dateExpiration" class="form-label">Date d'expiration</label>
+      <input
+        type="date"
+        class="form-control"
+        id="dateExpiration"
+        name="dateExpiration"
+        [(ngModel)]="produit.dateExpiration"
+      />
+    </div>
+    <div class="mb-3">
+      <label for="stock" class="form-label">Stock</label>
+      <input
+        type="number"
+        class="form-control"
+        id="stock"
+        name="stock"
+        [(ngModel)]="produit.stock"
+        min="0"
+      />
+    </div>
+    <div class="mb-3">
+      <label for="seuilMin" class="form-label">Seuil Minimum</label>
+      <input
+        type="number"
+        class="form-control"
+        id="seuilMin"
+        name="seuilMin"
+        [(ngModel)]="produit.seuilMin"
+        min="0"
+      />
+    </div>
+    <div class="mb-3">
+      <label for="fournisseur" class="form-label">Fournisseur</label>
+      <input
+        type="text"
+        class="form-control"
+        id="fournisseur"
+        name="fournisseur"
+        [(ngModel)]="produit.fournisseur"
+      />
+    </div>
+    <div class="mb-3">
+      <label for="fournisseurId" class="form-label">Fournisseur ID</label>
+      <input
+        type="number"
+        class="form-control"
+        id="fournisseurId"
+        name="fournisseurId"
+        [(ngModel)]="produit.fournisseurId"
+      />
+    </div>
+    <div class="mb-3">
+      <label for="category" class="form-label">Catégorie</label>
+      <select
+        class="form-control"
+        id="category"
+        name="category"
+        [(ngModel)]="produit.category"
+        required
+        #category="ngModel"
+        [ngClass]="{'is-invalid': category.invalid && category.touched}"
+      >
+        <option value="" disabled>Sélectionner une catégorie</option>
+        <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+      </select>
+      <div class="invalid-feedback" *ngIf="category.invalid && category.touched">
+        La catégorie est requise.
+      </div>
+    </div>
+    <div class="mb-3">
+      <label for="imageFile" class="form-label">Image</label>
+      <input
+        type="file"
+        class="form-control"
+        id="imageFile"
+        name="imageFile"
+        (change)="onFileChange($event)"
+        accept="image/*"
+        required
+      />
+    </div>
+    <button class="btn btn-success" type="submit" [disabled]="produitForm.invalid">
+      Créer
+    </button>
+  </form>
+</div>

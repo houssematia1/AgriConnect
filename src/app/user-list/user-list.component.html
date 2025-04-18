@@ -1,0 +1,37 @@
+<div class="user-cards-container">
+  <h2>Liste des utilisateurs</h2>
+  
+
+  <div class="filter-container">
+    <input
+      type="text"
+      placeholder="Rechercher par nom, prénom ou email..."
+      [(ngModel)]="searchTerm"
+      (ngModelChange)="onSearch()">
+    <select id="roleFilter" [(ngModel)]="selectedRole" (change)="onRoleChange($event)">
+      <option value="all">Tous</option>
+      <option value="admin">Admin</option>
+      <option value="user">Client</option>
+      <option value="agriculteur">Agriculteur</option>
+      <option value="livreur">Livreur</option>
+    </select>
+  </div>
+  
+  <div class="cards-grid">
+    <div class="user-card" *ngFor="let user of users">
+      <div class="card-header">
+        <span class="user-id">#{{ user.id }}</span>
+      </div>
+      <div class="card-body">
+        <h3 class="user-name">{{ user.nom }} {{ user.prenom }}</h3>
+        <p class="user-email">{{ user.email }}</p>
+        <p class="user-phone">Téléphone : {{ user.numeroDeTelephone }}</p>
+        <p class="user-role">Rôle : {{ user.role }}</p>
+      </div>
+      <div class="card-footer">
+        <button type="button" class="btn btn-edit" (click)="onUpdateUser(user)">Edit</button>
+        <button type="button" class="btn btn-delete" (click)="onDeleteUser(user)">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
