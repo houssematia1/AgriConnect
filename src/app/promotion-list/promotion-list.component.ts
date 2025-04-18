@@ -2,7 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { format, parse } from 'date-fns';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 
+// Interface for Promotion data
 interface Promotion {
   id: number;
   nom: string;
@@ -14,6 +17,7 @@ interface Promotion {
   produits?: any[];
 }
 
+// Interface for promotion statistics
 interface PromotionStat {
   promotionId: number;
   promotionName: string;
@@ -21,6 +25,7 @@ interface PromotionStat {
   totalRevenueImpact: number;
 }
 
+// Interface for analytics response
 interface AnalyticsResponse {
   promotionStats: PromotionStat[];
   totalPromotionsApplied: number;
@@ -50,20 +55,22 @@ export class PromotionListComponent implements OnInit {
   successMessage: string | null = null;
   errorMessage: string | null = null;
 
-  // Use plain objects instead of Maps for template binding
+  // Objects for template bindings
   promotionAmounts: { [key: number]: number } = {};
   appliedMontants: { [key: number]: number | null } = {};
 
+  // Filter and sort properties
   searchTerm: string = '';
   filterCondition: string = '';
   filterStartDate: string = '';
   filterEndDate: string = '';
-
   sortColumn: keyof Promotion | '' = '';
   sortDirection: 'asc' | 'desc' = 'asc';
 
+  // Selected promotion IDs for bulk actions
   selectedPromotionIds: Set<number> = new Set<number>();
 
+  // Chart data for analytics
   promotionStats: PromotionStat[] = [];
   totalPromotionsApplied: number = 0;
   barChartLabels: string[] = [];
@@ -78,7 +85,10 @@ export class PromotionListComponent implements OnInit {
 
   private apiUrl = 'http://localhost:8082/promotions';
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private dialog: MatDialog
+  ) {}
 
   ngOnInit(): void {
     console.log('PromotionListComponent initialized');
@@ -113,6 +123,17 @@ export class PromotionListComponent implements OnInit {
     );
   }
 
+  private showSuccess(message: string): void {
+    this.successMessage = message;
+    this.clearMessages();
+  }
+
+  private handleError(context: string, error: any): void {
+    console.error(`${context}:`, error);
+    this.errorMessage = `${context}: ${error.error?.message || error.message}`;
+    this.clearMessages();
+  }
+
   getPromotions(): Observable<Promotion[]> {
     console.log('getPromotions called');
     return this.http.get<Promotion[]>(this.apiUrl, { withCredentials: true });
@@ -144,15 +165,12 @@ export class PromotionListComponent implements OnInit {
   }
 
   addPromotion(): void {
-    // Crée une copie sans l'ID
     const { id, ...promotionSansId } = this.newPromotion;
-    
     const payload = {
       ...promotionSansId,
       dateDebut: this.formatDateForInput(promotionSansId.dateDebut),
       dateFin: this.formatDateForInput(promotionSansId.dateFin)
     };
-  
     this.http.post<Promotion>(`${this.apiUrl}/add`, payload, {
       headers: { 'Content-Type': 'application/json' },
       withCredentials: true
@@ -175,13 +193,14 @@ export class PromotionListComponent implements OnInit {
       }
     );
   }
-  
+
   private extractErrorMessage(error: any): string {
     if (error.error?.message) {
       return error.error.message;
     }
     return `Failed to add promotion. Status: ${error.status}`;
   }
+
   editPromotion(promotion: Promotion): void {
     console.log('editPromotion called with promotion:', promotion);
     this.editMode = true;
@@ -234,20 +253,31 @@ export class PromotionListComponent implements OnInit {
       this.clearMessages();
       return;
     }
-    this.http.delete(`${this.apiUrl}/${id}`).subscribe(
-      () => {
-        console.log('Promotion deleted successfully, ID:', id);
-        this.promotions = this.promotions.filter(p => p.id !== id);
-        this.applyFilters();
-        this.successMessage = 'Promotion deleted successfully!';
-        this.clearMessages();
-      },
-      error => {
-        console.error('Error deleting promotion:', error);
-        this.errorMessage = `Failed to delete promotion. Status: ${error.status}, Message: ${error.error?.error || error.message}`;
-        this.clearMessages();
+    const promotion = this.promotions.find(p => p.id === id);
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: { 
+        title: 'Confirm Deletion',
+        message: `Are you sure you want to delete "${promotion?.nom}"?`
       }
-    );
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.http.delete(`${this.apiUrl}/${id}`).subscribe(
+          () => {
+            console.log('Promotion deleted successfully, ID:', id);
+            this.promotions = this.promotions.filter(p => p.id !== id);
+            this.applyFilters();
+            this.successMessage = 'Promotion deleted successfully!';
+            this.clearMessages();
+          },
+          error => {
+            console.error('Error deleting promotion:', error);
+            this.errorMessage = `Failed to delete promotion. Status: ${error.status}, Message: ${error.error?.error || error.message}`;
+            this.clearMessages();
+          }
+        );
+      }
+    });
   }
 
   applyPromotion(id: number): void {
@@ -326,30 +356,24 @@ export class PromotionListComponent implements OnInit {
   applyFilters(): void {
     console.log('applyFilters called with searchTerm:', this.searchTerm, 'filterCondition:', this.filterCondition, 'filterStartDate:', this.filterStartDate, 'filterEndDate:', this.filterEndDate);
     let filtered = [...this.promotions];
-
     if (this.searchTerm.trim()) {
       filtered = filtered.filter(promotion =>
         promotion.nom.toLowerCase().includes(this.searchTerm.trim().toLowerCase())
       );
     }
-
     if (this.filterCondition) {
       filtered = filtered.filter(promotion => promotion.conditionPromotion === this.filterCondition);
     }
-
     if (this.filterStartDate) {
       const startDate = parse(this.filterStartDate, 'yyyy-MM-dd', new Date());
       filtered = filtered.filter(promotion => new Date(promotion.dateDebut) >= startDate);
     }
-
     if (this.filterEndDate) {
       const endDate = parse(this.filterEndDate, 'yyyy-MM-dd', new Date());
       filtered = filtered.filter(promotion => new Date(promotion.dateFin) <= endDate);
     }
-
     this.filteredPromotions = filtered;
     console.log('Filtered promotions:', this.filteredPromotions);
-
     if (this.sortColumn) {
       this.sortPromotions(this.sortColumn);
     }
@@ -372,11 +396,9 @@ export class PromotionListComponent implements OnInit {
       this.sortColumn = column;
       this.sortDirection = 'asc';
     }
-
     this.filteredPromotions.sort((a, b) => {
       const valueA = a[column];
       const valueB = b[column];
-
       if ((valueA instanceof Date || typeof valueA === 'string') && (valueB instanceof Date || typeof valueB === 'string')) {
         const dateA = new Date(valueA);
         const dateB = new Date(valueB);
@@ -384,19 +406,16 @@ export class PromotionListComponent implements OnInit {
           ? dateA.getTime() - dateB.getTime()
           : dateB.getTime() - dateA.getTime();
       }
-
       if (typeof valueA === 'string' && typeof valueB === 'string') {
         return this.sortDirection === 'asc'
           ? valueA.localeCompare(valueB)
           : valueB.localeCompare(valueA);
       }
-
       if (typeof valueA === 'number' && typeof valueB === 'number') {
         return this.sortDirection === 'asc'
           ? valueA - valueB
           : valueB - valueA;
       }
-
       return 0;
     });
     console.log('Sorted filtered promotions:', this.filteredPromotions);
@@ -437,13 +456,11 @@ export class PromotionListComponent implements OnInit {
     const ids = Array.from(this.selectedPromotionIds);
     console.log('bulkActivate called with IDs:', ids);
     if (ids.length === 0) return;
-
     if (!ids.every(id => this.isValidId(id))) {
       this.errorMessage = 'One or more selected promotion IDs are invalid.';
       this.clearMessages();
       return;
     }
-
     this.http.post(`${this.apiUrl}/bulk-activate`, ids).subscribe(
       () => {
         console.log('Bulk activate successful for IDs:', ids);
@@ -464,13 +481,11 @@ export class PromotionListComponent implements OnInit {
     const ids = Array.from(this.selectedPromotionIds);
     console.log('bulkDeactivate called with IDs:', ids);
     if (ids.length === 0) return;
-
     if (!ids.every(id => this.isValidId(id))) {
       this.errorMessage = 'One or more selected promotion IDs are invalid.';
       this.clearMessages();
       return;
     }
-
     this.http.post(`${this.apiUrl}/bulk-deactivate`, ids).subscribe(
       () => {
         console.log('Bulk deactivate successful for IDs:', ids);
@@ -489,39 +504,33 @@ export class PromotionListComponent implements OnInit {
 
   bulkDelete(): void {
     const ids = Array.from(this.selectedPromotionIds);
-    console.log('bulkDelete called with IDs:', ids);
     if (ids.length === 0) return;
-
-    if (!ids.every(id => this.isValidId(id))) {
-      this.errorMessage = 'One or more selected promotion IDs are invalid.';
-      this.clearMessages();
-      return;
-    }
-
-    this.http.post(`${this.apiUrl}/bulk-delete`, ids).subscribe(
-      () => {
-        console.log('Bulk delete successful for IDs:', ids);
-        this.promotions = this.promotions.filter(promotion =>
-          !this.selectedPromotionIds.has(promotion.id)
-        );
-        this.applyFilters();
-        this.selectedPromotionIds.clear();
-        this.successMessage = 'Selected promotions deleted successfully!';
-        this.clearMessages();
-      },
-      error => {
-        console.error('Error deleting promotions:', error);
-        this.errorMessage = `Failed to delete selected promotions. Status: ${error.status}, Message: ${error.error?.error || error.message}`;
-        this.clearMessages();
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: { 
+        title: 'Confirm Bulk Deletion',
+        message: `You're about to delete ${ids.length} promotions.`,
+        warning: 'This action is irreversible!'
       }
-    );
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.http.post(`${this.apiUrl}/bulk-delete`, ids).subscribe({
+          next: () => {
+            this.promotions = this.promotions.filter(p => !this.selectedPromotionIds.has(p.id));
+            this.applyFilters();
+            this.selectedPromotionIds.clear();
+            this.showSuccess(`${ids.length} promotions deleted!`);
+          },
+          error: error => this.handleError('Bulk deletion failed', error)
+        });
+      }
+    });
   }
 
   exportPromotionsToCSV(): void {
     console.log('exportPromotionsToCSV called');
     const headers = ['ID', 'Name', 'Discount (%)', 'Start Date', 'End Date', 'Condition', 'Active'];
     const csvRows = [headers.join(',')];
-
     for (const promotion of this.promotions) {
       const row = [
         promotion.id,
@@ -534,7 +543,6 @@ export class PromotionListComponent implements OnInit {
       ];
       csvRows.push(row.join(','));
     }
-
     const csvContent = csvRows.join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = window.URL.createObjectURL(blob);
@@ -554,25 +562,21 @@ export class PromotionListComponent implements OnInit {
       this.clearMessages();
       return false;
     }
-
     if (promotion.pourcentageReduction < 0 || promotion.pourcentageReduction > 100) {
       this.errorMessage = 'Discount percentage must be between 0 and 100.';
       this.clearMessages();
       return false;
     }
-
     if (new Date(promotion.dateDebut) > new Date(promotion.dateFin)) {
       this.errorMessage = 'End date must be after start date.';
       this.clearMessages();
       return false;
     }
-
     if (!promotion.conditionPromotion) {
       this.errorMessage = 'Condition is required.';
       this.clearMessages();
       return false;
     }
-
     return true;
   }
 
@@ -630,7 +634,6 @@ export class PromotionListComponent implements OnInit {
           promotionId: Number(stat.promotionId)
         }));
         this.totalPromotionsApplied = data.totalPromotionsApplied || 0;
-
         this.barChartLabels = this.promotionStats.map(stat => stat.promotionName);
         this.barChartData[0].data = this.promotionStats.map(stat => stat.usageCount);
         this.barChartData[1].data = this.promotionStats.map(stat => stat.totalRevenueImpact);
@@ -679,25 +682,36 @@ export class PromotionListComponent implements OnInit {
 
   rejectAISuggestion(id: number): void {
     console.log('rejectAISuggestion called with ID:', id);
-    if (!this.isValidId(id)) {
-      this.errorMessage = 'Invalid promotion ID.';
-      this.clearMessages();
-      return;
-    }
-    this.http.delete(`${this.apiUrl}/${id}`).subscribe(
-      () => {
-        console.log('AI suggestion rejected, ID:', id);
-        this.promotions = this.promotions.filter(p => p.id !== id);
-        this.applyFilters();
-        this.successMessage = 'AI-suggested promotion rejected!';
-        this.clearMessages();
-      },
-      error => {
-        console.error('Error rejecting AI suggestion:', error);
-        this.errorMessage = `Failed to reject AI suggestion. Status: ${error.status}, Message: ${error.error?.error || error.message}`;
-        this.clearMessages();
+    const promotion = this.promotions.find(p => p.id === id);
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: { 
+        title: 'Confirm Rejection',
+        message: `Are you sure you want to reject AI suggestion "${promotion?.nom}"?`
       }
-    );
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        if (!this.isValidId(id)) {
+          this.errorMessage = 'Invalid promotion ID.';
+          this.clearMessages();
+          return;
+        }
+        this.http.delete(`${this.apiUrl}/${id}`).subscribe(
+          () => {
+            console.log('AI suggestion rejected, ID:', id);
+            this.promotions = this.promotions.filter(p => p.id !== id);
+            this.applyFilters();
+            this.successMessage = 'AI-suggested promotion rejected!';
+            this.clearMessages();
+          },
+          error => {
+            console.error('Error rejecting AI suggestion:', error);
+            this.errorMessage = `Failed to reject AI suggestion. Status: ${error.status}, Message: ${error.error?.error || error.message}`;
+            this.clearMessages();
+          }
+        );
+      }
+    });
   }
 
   private isValidId(id: number): boolean {

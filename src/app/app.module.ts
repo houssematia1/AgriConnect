@@ -13,7 +13,8 @@ import { UserEditComponent } from './user-edit/user-edit.component';
 import { PromotionListComponent } from './promotion-list/promotion-list.component';
 import { NgChartsModule} from 'ng2-charts'; // Import ChartsModule
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-
+import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
+import{ MatDialogModule} from '@angular/material/dialog'; // Import MatDialogModule
 @NgModule({
   declarations: [
     AppComponent,
@@ -23,6 +24,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
     UserListComponent,
     UserEditComponent,
     PromotionListComponent,
+    ConfirmDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -31,7 +33,8 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
     HttpClientModule,
     AppRoutingModule,
     NgChartsModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatDialogModule
   ],
   providers: [],
   bootstrap: [AppComponent]
