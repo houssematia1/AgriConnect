@@ -1,7 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
@@ -14,8 +14,7 @@ import { UserEditComponent } from './user-edit/user-edit.component';
 import { LivraisonComponent } from './livraison/livraison.component';
 import { ProfileComponent } from './profile/profile.component';
 import { HistoriqueComponent } from './historique/historique.component';
-import { GoogleMapsComponent } from './google-maps/google-maps.component';
-import {AgmCoreModule} from "@agm/core";
+
 
 @NgModule({
   declarations: [
@@ -28,7 +27,6 @@ import {AgmCoreModule} from "@agm/core";
     LivraisonComponent,
     ProfileComponent,
     HistoriqueComponent,
-    GoogleMapsComponent,
   ],
   imports: [
     BrowserModule,
@@ -37,11 +35,12 @@ import {AgmCoreModule} from "@agm/core";
     HttpClientModule,
     AppRoutingModule,
     BrowserAnimationsModule,
-    AgmCoreModule.forRoot({
-      apiKey: 'AIzaSyCH-qIi6RzomB2m3iW1nAZzRYXQG1yxU3Y'
-    })
+
   ],
   providers: [],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
+
+
+

@@ -14,9 +14,11 @@
         <i class="material-icons">assignment</i><span>Orders</span>
       </a>
     </li>
-    <li>      <a [routerLink]="['/historique', userId]" data-tooltip="Historique">
-      <i class="material-icons">history</i><span>Historique</span>
-    </a></li>
+    <li>
+      <a [routerLink]="['/historique', userId]" data-tooltip="Historique">
+        <i class="material-icons">history</i><span>Historique</span>
+      </a>
+    </li>
     <li>
       <a [routerLink]="['/profile', userId]" data-tooltip="Profile">
         <i class="material-icons">person</i><span>Profile</span>
@@ -33,53 +35,96 @@
 <!-- Main Content -->
 <div class="container" [ngClass]="{'expanded': isSidebarCollapsed}">
   <div class="header">
-    <h1>Driver Dashboard</h1>
-    <span class="user">Hello, {{driverName}}</span>
+    <h1>Commandes en cours</h1>
+    <div class="header-right">
+      <span class="user">Bonjour, {{driverName}}</span>
+      <button class="refresh-btn" (click)="loadCommandes()">
+        <i class="material-icons">refresh</i>
+      </button>
+    </div>
   </div>
 
-  <div class="cards">
-    <div class="card">
-      <h3>Commandes en cours</h3>
-      <div class="order"
-           *ngFor="let commande of commandes"
-           [ngClass]="{
-             'livre': commande.statut === 'LIVRE',
-             'non-livre': commande.statut === 'NON_LIVRE'
-           }"
-           [attr.data-id]="commande.id">
-        <div class="order-info">
-          <div class="order-header">
-            <span class="order-id">#{{commande.id}}</span>
-            <span class="order-status" [ngClass]="commande.statut.toLowerCase()">{{commande.statut}}</span>
+  <div class="orders-container">
+    <div class="orders-grid" *ngIf="pendingCommandes.length > 0">
+      <div class="order-card" *ngFor="let commande of pendingCommandes" [attr.data-id]="commande.id"
+        [attr.data-status]="commande.statusLivraison">
+        <div class="order-header">
+          <div class="order-header-left">
+            <span class="order-id">Commande #{{commande.id}}</span>
+            <span class="taken-by" *ngIf="commande.isTaken && commande.livreur.nom">
+              Pris par: {{commande.livreur.nom}}
+            </span>
           </div>
-          <div class="client-info">
-            <div class="client-name">
-              <i class="material-icons">person</i>
-              <span>{{commande.clientNom}}</span>
-            </div>
-            <div class="client-address">
-              <i class="material-icons">location_on</i>
-              <span>{{commande.address}}</span>
-            </div>
-            <div class="client-phone">
-              <i class="material-icons">phone</i>
-              <span>{{commande.telephone}}</span>
+          <div class="order-status-container">
+            <span class="order-status" [ngClass]="{
+              'pending': commande.statusLivraison === 'TAKE_IT',
+              'taken': commande.statusLivraison === 'EN_COURS',
+              'delivered': commande.statusLivraison === 'LIVRE',
+              'not-delivered': commande.statusLivraison === 'NON_LIVRE'
+            }">
+              {{commande.statusLivraison === 'TAKE_IT' ? 'En attente' :
+              commande.statusLivraison === 'EN_COURS' ? 'Prise en charge' :
+              commande.statusLivraison === 'LIVRE' ? 'Livré' : 'Non livré'}}
+            </span>
+            <div class="timer-container" *ngIf="commande.id && hidingOrders.has(commande.id)">
+              <span class="countdown-timer" [ngClass]="{
+                'timer-delivered': commande.statusLivraison === 'LIVRE',
+                'timer-not-delivered': commande.statusLivraison === 'NON_LIVRE'
+              }">
+                {{commande.id ? getRemainingTime(commande.id) : 0}}s
+              </span>
+              <button class="cancel-status-btn" (click)="cancelStatusChange(commande)">
+                <i class="material-icons">close</i>
+              </button>
             </div>
           </div>
         </div>
-        <div class="order-actions">
-          <button
-            [disabled]="commande.statut !== 'PENDING'"
-            (click)="showConfirm(commande.id)">
-            {{commande.statut === 'PENDING' ? 'Mettre à jour le statut' :
-            commande.statut === 'LIVRE' ? 'LIVRÉ' : 'NON LIVRÉ'}}
-          </button>
-          <div class="photo-preview" *ngIf="commande.photo">
-            <img [src]="commande.photo" alt="Preuve de livraison">
+
+        <div class="take-it-label" *ngIf="commande.isTaken && commande.statusLivraison === 'EN_COURS'">
+          <i class="material-icons">check_circle</i>
+          Take-it
+        </div>
+
+        <div class="client-info">
+          <div class="info-item">
+            <i class="material-icons">person</i>
+            <span>{{commande.clientNom}}</span>
           </div>
-          <div class="reason" *ngIf="commande.reason">Raison: {{commande.reason}}</div>
+          <div class="info-item">
+            <i class="material-icons">location_on</i>
+            <span>{{commande.address}}</span>
+          </div>
+          <div class="info-item">
+            <i class="material-icons">phone</i>
+            <span>{{commande.telephone}}</span>
+          </div>
+        </div>
+
+        <div class="order-actions">
+          <button *ngIf="!commande.isTaken" class="take-order-btn" (click)="takeOrder(commande)"
+            [disabled]="commande.id && hidingOrders.has(commande.id)">
+            <i class="material-icons">assignment_turned_in</i>
+            Prendre en charge
+          </button>
+          <div *ngIf="commande.isTaken && commande.statusLivraison === 'EN_COURS'" class="delivery-actions">
+            <button class="delivered-btn" (click)="commande.id && showConfirm(commande.id, 'LIVRE')"
+              [disabled]="commande.id && hidingOrders.has(commande.id)">
+              <i class="material-icons">check_circle</i>
+              Livré
+            </button>
+            <button class="not-delivered-btn" (click)="commande.id && showConfirm(commande.id, 'NON_LIVRE')"
+              [disabled]="commande.id && hidingOrders.has(commande.id)">
+              <i class="material-icons">cancel</i>
+              Non livré
+            </button>
+          </div>
         </div>
       </div>
+    </div>
+
+    <div class="no-orders" *ngIf="pendingCommandes.length === 0">
+      <i class="material-icons">inbox</i>
+      <p>Aucune commande en attente</p>
     </div>
   </div>
 </div>
@@ -87,27 +132,20 @@
 <!-- Confirmation Modal -->
 <div class="modal" id="confirmModal">
   <div class="modal-content">
-    <p>Update status for Order #{{currentOrderId}}</p>
-    <div class="modal-buttons" *ngIf="!isCameraActive && !isReasonInputActive">
-      <button class="livre" (click)="startCamera()">DELIVERED</button>
-      <button class="non-livre" (click)="showReasonInput()">NOT DELIVERED</button>
-      <button class="cancel" (click)="hideConfirm()">Cancel</button>
-    </div>
-
+    <p>Mettre à jour le statut pour la commande #{{currentOrderId}}</p>
     <video #video autoplay [hidden]="!isCameraActive"></video>
     <canvas #canvas hidden></canvas>
-    <textarea #reasonInput
-              placeholder="Reason for non-delivery (required)"
-              [hidden]="!isReasonInputActive"></textarea>
+    <textarea #reasonInput placeholder="Raison de la non-livraison (obligatoire)"
+      [hidden]="!isReasonInputActive"></textarea>
 
     <div class="modal-buttons" *ngIf="isCameraActive">
-      <button class="livre" (click)="capturePhoto()">Capture Photo</button>
-      <button class="cancel" (click)="hideConfirm()">Cancel</button>
+      <button class="livre" (click)="capturePhoto()">Prendre la photo</button>
+      <button class="cancel" (click)="hideConfirm()">Annuler</button>
     </div>
 
     <div class="modal-buttons" *ngIf="isReasonInputActive">
-      <button class="non-livre" (click)="submitNonLivre()">Submit</button>
-      <button class="cancel" (click)="hideConfirm()">Cancel</button>
+      <button class="non-livre" (click)="submitNonLivre()">Valider</button>
+      <button class="cancel" (click)="hideConfirm()">Annuler</button>
     </div>
   </div>
 </div>
