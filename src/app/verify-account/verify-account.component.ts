@@ -17,7 +17,7 @@ export class VerifyAccountComponent {
     private router: Router,
     private route: ActivatedRoute
   ) {
-    // Récupérer l'email depuis l'URL si présent
+    
     this.route.queryParams.subscribe(params => {
       if (params['email']) {
         this.email = params['email'];
@@ -26,7 +26,7 @@ export class VerifyAccountComponent {
   }
 
   onVerify(): void {
-    // Envoi du code sans guillemets (valeur brute)
+   
     const trimmedCode = this.code.trim();
 
     this.userService.verifyAccount(this.email, trimmedCode).subscribe({

@@ -14,8 +14,7 @@ import { UserFormComponent } from './user-form/user-form.component';
 import { VerifyAccountComponent } from './verify-account/verify-account.component';
 import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './reset-password/reset-password.component';
-import { UserStatsComponent } from './user-stats/user-stats.component';
-
+import { DashboardComponent } from './dashboard/dashboard.component'; // ✅ Ajout
 
 @NgModule({
   declarations: [
@@ -29,12 +28,12 @@ import { UserStatsComponent } from './user-stats/user-stats.component';
     VerifyAccountComponent,
     ForgotPasswordComponent,
     ResetPasswordComponent,
-    UserStatsComponent,
+    DashboardComponent // ✅ Ajout
   ],
   imports: [
     BrowserModule,
     FormsModule,
-    ReactiveFormsModule,  // IMPORTANT : Pour utiliser [formGroup] dans UserEditComponent
+    ReactiveFormsModule,
     HttpClientModule,
     AppRoutingModule
   ],

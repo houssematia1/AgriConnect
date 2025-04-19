@@ -10,7 +10,7 @@ import { UserFormComponent } from './user-form/user-form.component';
 import { VerifyAccountComponent } from './verify-account/verify-account.component';
 import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './reset-password/reset-password.component';
-import { UserStatsComponent } from './user-stats/user-stats.component'; // ✅ ajout stats
+import { DashboardComponent } from './dashboard/dashboard.component'; // ✅ Ajout
 import { AdminGuard } from './guards/admin.guard';
 
 const routes: Routes = [
@@ -20,7 +20,7 @@ const routes: Routes = [
   { path: 'verify', component: VerifyAccountComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'reset-password', component: ResetPasswordComponent },
-  { path: 'stats', component: UserStatsComponent, canActivate: [AdminGuard] }, // ✅ route stats protégée
+  { path: 'stats', component: DashboardComponent, canActivate: [AdminGuard] }, // ✅ Route protégée
   { path: 'users', component: UserListComponent, canActivate: [AdminGuard] },
   { path: 'users/add', component: UserFormComponent, canActivate: [AdminGuard] },
   { path: 'users/edit/:id', component: UserEditComponent, canActivate: [AdminGuard] },

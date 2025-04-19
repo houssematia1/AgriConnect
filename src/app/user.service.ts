@@ -81,4 +81,8 @@ export class UserService {
   getRiskScore(id: number): Observable<any> {
     return this.http.get(`http://localhost:8082/api/users/predict/${id}`);
   }
+  getUserStats(): Observable<any> {
+    return this.http.get('http://localhost:8082/api/users/stats');
+  }
+  
 }
