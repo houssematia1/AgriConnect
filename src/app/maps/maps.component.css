@@ -1,0 +1,22 @@
+.leaflet-routing-container {
+    font-family: Arial, sans-serif;
+    z-index: 1000;
+  }
+  
+  .leaflet-routing-geocoders input {
+    padding: 4px;
+    font-size: 14px;
+  }
+  
+  .leaflet-routing-add-waypoint {
+    display: none; /* Hide 'add via point' button if unwanted */
+  }
+  
+  :host ::ng-deep .leaflet-routing-container {
+    display: none !important; /* hide the default UI */
+  }
+  
+  #map {
+    width: 100%;
+    height: 100vh;
+  }

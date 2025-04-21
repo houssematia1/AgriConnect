@@ -14,6 +14,8 @@ import { UserEditComponent } from './user-edit/user-edit.component';
 import { LivraisonComponent } from './livraison/livraison.component';
 import { ProfileComponent } from './profile/profile.component';
 import { HistoriqueComponent } from './historique/historique.component';
+import { GoogleMapsModule } from '@angular/google-maps';
+import { MapsComponent } from './maps/maps.component';
 
 
 @NgModule({
@@ -27,6 +29,7 @@ import { HistoriqueComponent } from './historique/historique.component';
     LivraisonComponent,
     ProfileComponent,
     HistoriqueComponent,
+    MapsComponent,
   ],
   imports: [
     BrowserModule,
@@ -35,6 +38,7 @@ import { HistoriqueComponent } from './historique/historique.component';
     HttpClientModule,
     AppRoutingModule,
     BrowserAnimationsModule,
+    GoogleMapsModule,
 
   ],
   providers: [],

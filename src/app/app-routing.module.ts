@@ -9,6 +9,7 @@ import { AdminGuard } from './guards/admin.guard';
 import {LivraisonComponent} from "./livraison/livraison.component";
 import {ProfileComponent} from "./profile/profile.component";
 import {HistoriqueComponent} from "./historique/historique.component";
+import { MapsComponent } from './maps/maps.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -19,6 +20,7 @@ const routes: Routes = [
   { path: 'livraison/:userId', component: LivraisonComponent },
   { path: 'profile/:userId', component: ProfileComponent },
   { path: 'historique/:userId', component: HistoriqueComponent },
+  { path: 'map', component: MapsComponent },
 
 
 
