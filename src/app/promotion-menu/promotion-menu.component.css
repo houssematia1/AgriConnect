@@ -1,139 +1,61 @@
-/* Container for the menu */
 .menu-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem 1rem;
-    background-color: #F5F5F5; /* Light gray background for a clean look */
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
-  
-  /* Banner styling */
-  .banner {
-    height: 48rem; /* Increased height for a more prominent banner */
-    border-radius: 12px;
-    overflow: hidden;
-    position: relative;
-  }
-  
-  .banner img {
-    transition: transform 0.3s ease; /* Smooth zoom effect on hover */
-  }
-  
-  .banner:hover img {
-    transform: scale(1.05); /* Slight zoom on hover */
-  }
-  
-  /* Overlay with gradient for depth */
-  .banner::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.3));
-    border-radius: 12px;
-  }
-  
-  /* Banner text styling */
-  .banner-text {
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
-    font-family: 'Roboto', sans-serif; /* Professional font */
-  }
-  
-  .banner-text h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #FFFFFF;
-    margin-bottom: 0.5rem;
-  }
-  
-  .banner-text p {
-    font-size: 1.25rem;
-    font-weight: 400;
-    color: #E0E0E0;
-  }
-  
-  /* Navigation styling */
-  nav {
-    background-color: #FFFFFF;
-    border-radius: 12px;
-    padding: 1rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  nav ul {
-    list-style: none;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    gap: 1.5rem; /* Increased spacing between buttons */
-  }
-  
-  nav li {
-    display: inline-block;
-  }
-  
-  /* Button styling for navigation links */
-  nav a {
-    display: inline-block;
-    padding: 0.75rem 1.5rem;
-    background-color: #2E7D32; /* Deep green for agricultural theme */
-    color: #FFFFFF;
-    font-family: 'Roboto', sans-serif;
-    font-weight: 500;
-    font-size: 1rem;
-    border-radius: 8px;
-    text-decoration: none;
-    transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  }
-  
-  nav a:hover {
-    background-color: #A5D6A7; /* Light green on hover */
-    color: #2E7D32;
-    transform: translateY(-2px); /* Slight lift effect */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  }
-  
-  nav a:active {
-    transform: translateY(0); /* Reset lift on click */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  }
-  
-  /* Responsive adjustments */
-  @media (max-width: 768px) {
-    .banner {
-      height: 32rem;
-    }
-    
-    .banner-text h1 {
-      font-size: 2rem;
-    }
-    
-    .banner-text p {
-      font-size: 1rem;
-    }
-    
-    nav ul {
-      flex-direction: column;
-      gap: 1rem;
-    }
-    
-    nav a {
-      width: 100%;
-      text-align: center;
-    }
-  }
-  
-  @media (max-width: 640px) {
-    .banner {
-      height: 24rem;
-    }
-    
-    .banner-text h1 {
-      font-size: 1.5rem;
-    }
-    
-    .banner-text p {
-      font-size: 0.875rem;
-    }
-  }
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.banner {
+  background-image: url('/assets/template/images/agri-promo-banner.jpg');
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  min-height: 40vh; /* 40% de la hauteur de l’écran */
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+}
+
+.banner-text {
+  animation: fadeIn 1s ease-in-out;
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.nav-button {
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.nav-button:hover {
+  background-color: var(--hover-color);
+}
+
+.nav-button.active {
+  font-weight: bold;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.nav-button i {
+  font-size: 1.2em;
+}

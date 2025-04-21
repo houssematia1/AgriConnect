@@ -1,12 +1,32 @@
-import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { Observable, interval, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { format, parse } from 'date-fns';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { PromotionUpdateService } from '../services/promotion/promotion-update.service';
 
+// Interface for Product
+interface Produit {
+  id: number;
+  nom: string;
+  prix: number;
+  devise?: string;
+  description?: string;
+  taxe?: number;
+  dateExpiration?: string;
+  fournisseur?: string;
+  fournisseurId?: number;
+  image?: string;
+  stock?: number;
+  seuilMin?: number;
+  autoReapprovisionnement?: boolean;
+  quantiteReapprovisionnement?: number;
+  salesCount?: number;
+}
+
+// Interface for Promotion
 interface Promotion {
   id: number;
   nom: string;
@@ -15,7 +35,7 @@ interface Promotion {
   dateFin: Date | string;
   conditionPromotion: string;
   active: boolean;
-  produits?: any[];
+  produits?: Produit[];
 }
 
 @Component({
@@ -23,7 +43,7 @@ interface Promotion {
   templateUrl: './promotion-list.component.html',
   styleUrls: ['./promotion-list.component.css']
 })
-export class PromotionListComponent implements OnInit {
+export class PromotionListComponent implements OnInit, OnDestroy {
   promotions: Promotion[] = [];
   filteredPromotions: Promotion[] = [];
   paginatedPromotions: Promotion[] = [];
@@ -34,9 +54,6 @@ export class PromotionListComponent implements OnInit {
   errorMessage: string | null = null;
   isLoading = false;
 
-  promotionAmounts: { [key: number]: number } = {};
-  appliedMontants: { [key: number]: number | null } = {};
-
   searchTerm = '';
   filterCondition = '';
   filterStartDate = '';
@@ -45,11 +62,11 @@ export class PromotionListComponent implements OnInit {
   sortDirection: 'asc' | 'desc' = 'asc';
   selectedPromotionIds: Set<number> = new Set<number>();
 
-  // Pagination
   currentPage = 1;
   pageSize = 10;
   totalPages = 1;
 
+  private pollingSubscription: Subscription | null = null;
   private apiUrl = 'http://localhost:8082/promotions';
 
   constructor(
@@ -60,6 +77,15 @@ export class PromotionListComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadPromotions();
+    this.pollingSubscription = interval(30000).subscribe(() => {
+      this.loadPromotions();
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.pollingSubscription) {
+      this.pollingSubscription.unsubscribe();
+    }
   }
 
   loadPromotions(): void {
@@ -72,17 +98,28 @@ export class PromotionListComponent implements OnInit {
           ...promo,
           id: Number(promo.id),
           dateDebut: new Date(promo.dateDebut),
-          dateFin: new Date(promo.dateFin)
+          dateFin: new Date(promo.dateFin),
+          // Mapping des produits associés à chaque promotion
+          produits: promo.produits?.map((prod: any) => ({
+            ...prod,
+            prix: Number(prod.prix),
+            devise: prod.devise || 'TND', // Définit une devise par défaut
+            // Vous pouvez ajouter d'autres transformations ou calculs nécessaires ici
+          }))
         }));
         this.showingActiveOnly = false;
         this.applyFilters();
       },
-      error => {
-        this.errorMessage = `Échec du chargement des promotions: ${error.message}`;
+      (error: HttpErrorResponse) => {
+        console.error('Error loading promotions:', error);
+        console.log('Error status:', error.status);
+        console.log('Error response:', error.error);
+        this.errorMessage = `Échec du chargement des promotions: ${error.message}. Vérifiez que le serveur backend est en cours d'exécution et que l'API renvoie un JSON valide.`;
         this.clearMessages();
       }
     );
   }
+  
 
   private showSuccess(message: string): void {
     this.successMessage = message;
@@ -90,7 +127,8 @@ export class PromotionListComponent implements OnInit {
   }
 
   private handleError(context: string, error: any): void {
-    this.errorMessage = `${context}: ${error.message}`;
+    console.error(`${context}:`, error);
+    this.errorMessage = `${context}: ${error.message}. Vérifiez les logs pour plus de détails.`;
     this.clearMessages();
   }
 
@@ -108,12 +146,18 @@ export class PromotionListComponent implements OnInit {
           ...promo,
           id: Number(promo.id),
           dateDebut: new Date(promo.dateDebut),
-          dateFin: new Date(promo.dateFin)
+          dateFin: new Date(promo.dateFin),
+          produits: promo.produits?.map((prod: any) => ({
+            ...prod,
+            prix: Number(prod.prix),
+            devise: prod.devise || 'TND'
+          }))
         }));
         this.showingActiveOnly = true;
         this.applyFilters();
       },
       error => {
+        console.error('Error loading active promotions:', error);
         this.errorMessage = `Échec du chargement des promotions actives: ${error.message}`;
         this.clearMessages();
       }
@@ -130,17 +174,28 @@ export class PromotionListComponent implements OnInit {
     this.isLoading = true;
     const id = this.selectedPromotion.id;
     const payload = {
-      ...this.selectedPromotion,
+      id: this.selectedPromotion.id,
+      nom: this.selectedPromotion.nom,
+      pourcentageReduction: this.selectedPromotion.pourcentageReduction,
       dateDebut: this.formatDateForInput(this.selectedPromotion.dateDebut),
-      dateFin: this.formatDateForInput(this.selectedPromotion.dateFin)
+      dateFin: this.formatDateForInput(this.selectedPromotion.dateFin),
+      conditionPromotion: this.selectedPromotion.conditionPromotion,
+      active: this.selectedPromotion.active,
+      produits: this.selectedPromotion.produits
     };
-    this.http.put<Promotion>(`${this.apiUrl}/${id}`, payload).pipe(
+    const headers = new HttpHeaders().set('Content-Type', 'application/json');
+    this.http.put<Promotion>(`${this.apiUrl}/${id}`, payload, { headers }).pipe(
       finalize(() => this.isLoading = false)
     ).subscribe(
       updatedPromotion => {
         updatedPromotion.id = Number(updatedPromotion.id);
         updatedPromotion.dateDebut = new Date(updatedPromotion.dateDebut);
         updatedPromotion.dateFin = new Date(updatedPromotion.dateFin);
+        updatedPromotion.produits = updatedPromotion.produits?.map((prod: any) => ({
+          ...prod,
+          prix: Number(prod.prix),
+          devise: prod.devise || 'TND'
+        }));
         const index = this.promotions.findIndex(p => p.id === updatedPromotion.id);
         if (index !== -1) {
           this.promotions[index] = updatedPromotion;
@@ -148,11 +203,12 @@ export class PromotionListComponent implements OnInit {
         this.cancelEdit();
         this.applyFilters();
         this.showSuccess('Promotion mise à jour avec succès !');
-        this.promotionUpdateService.notifyUpdates(); // Notification
+        this.promotionUpdateService.notifyUpdates();
       },
       error => this.handleError('Échec de la mise à jour de la promotion', error)
     );
   }
+
   deletePromotion(id: number): void {
     if (!this.isValidId(id)) {
       this.errorMessage = 'ID de promotion invalide.';
@@ -176,7 +232,7 @@ export class PromotionListComponent implements OnInit {
             this.promotions = this.promotions.filter(p => p.id !== id);
             this.applyFilters();
             this.showSuccess('Promotion supprimée avec succès !');
-            this.promotionUpdateService.notifyUpdates(); // Notification
+            this.promotionUpdateService.notifyUpdates();
           },
           error => this.handleError('Échec de la suppression de la promotion', error)
         );
@@ -184,40 +240,50 @@ export class PromotionListComponent implements OnInit {
     });
   }
 
-  applyPromotion(id: number): void {
-    if (!this.isValidId(id)) {
+  toggleActiveStatus(promotion: Promotion): void {
+    if (!this.isValidId(promotion.id)) {
       this.errorMessage = 'ID de promotion invalide.';
       this.clearMessages();
       return;
     }
-    const montant = this.promotionAmounts[id] || 0;
-    if (montant <= 0) {
-      this.errorMessage = `Le montant pour la promotion ID ${id} doit être supérieur à 0.`;
-      this.clearMessages();
-      return;
-    }
     this.isLoading = true;
-    this.http.get<number>(`${this.apiUrl}/appliquer/${id}/${montant}`).pipe(
+    const payload = {
+      active: !promotion.active
+    };
+    const headers = new HttpHeaders()
+      .set('Content-Type', 'application/json')
+      .set('Accept', 'application/json');
+    console.log('Sending request to:', `${this.apiUrl}/${promotion.id}/toggle-active`);
+    console.log('Headers:', headers);
+    console.log('Payload:', JSON.stringify(payload));
+    console.log('Request method: PUT');
+    this.http.put<Promotion>(`${this.apiUrl}/${promotion.id}/toggle-active`, payload, { headers }).pipe(
       finalize(() => this.isLoading = false)
     ).subscribe(
-      newMontant => {
-        this.appliedMontants[id] = newMontant;
-        this.showSuccess(`Promotion ID ${id} appliquée avec succès !`);
+      updated => {
+        console.log('Response status:', 200); // Assuming success
+        console.log('Response body:', updated);
+        updated.id = Number(updated.id);
+        updated.dateDebut = new Date(updated.dateDebut);
+        updated.dateFin = new Date(updated.dateFin);
+        updated.produits = updated.produits?.map((prod: any) => ({
+          ...prod,
+          prix: Number(prod.prix),
+          devise: prod.devise || 'TND'
+        }));
+        const index = this.promotions.findIndex(p => p.id === updated.id);
+        if (index !== -1) {
+          this.promotions[index] = updated;
+        }
+        this.applyFilters();
+        this.showSuccess(`Promotion ${updated.active ? 'activée' : 'désactivée'} avec succès !`);
+        this.promotionUpdateService.notifyUpdates();
       },
-      error => this.handleError(`Échec de l’application de la promotion ID ${id}`, error)
-    );
-  }
-
-  applyExpirationPromotion(): void {
-    this.isLoading = true;
-    this.http.post(`${this.apiUrl}/appliquer-expiration`, {}).pipe(
-      finalize(() => this.isLoading = false)
-    ).subscribe(
-      () => {
-        this.loadPromotions();
-        this.showSuccess('Promotions expirées appliquées avec succès !');
-      },
-      error => this.handleError('Échec de l’application des promotions expirées', error)
+      error => {
+        console.log('Response status:', error.status);
+        console.log('Response body:', error.error);
+        this.handleError(`Échec de la ${promotion.active ? 'désactivation' : 'activation'} de la promotion`, error);
+      }
     );
   }
 
@@ -355,19 +421,19 @@ export class PromotionListComponent implements OnInit {
       return;
     }
     this.isLoading = true;
-    this.http.post(`${this.apiUrl}/bulk-activate`, ids).pipe(
+    const headers = new HttpHeaders().set('Content-Type', 'application/json');
+    this.http.post(`${this.apiUrl}/bulk-activate`, ids, { headers }).pipe(
       finalize(() => this.isLoading = false)
     ).subscribe(
       () => {
         this.loadPromotions();
         this.selectedPromotionIds.clear();
         this.showSuccess('Promotions sélectionnées activées avec succès !');
-        this.promotionUpdateService.notifyUpdates(); // Notification
+        this.promotionUpdateService.notifyUpdates();
       },
       error => this.handleError('Échec de l’activation des promotions sélectionnées', error)
     );
   }
-
 
   bulkDeactivate(): void {
     const ids = Array.from(this.selectedPromotionIds);
@@ -378,7 +444,8 @@ export class PromotionListComponent implements OnInit {
       return;
     }
     this.isLoading = true;
-    this.http.post(`${this.apiUrl}/bulk-deactivate`, ids).pipe(
+    const headers = new HttpHeaders().set('Content-Type', 'application/json');
+    this.http.post(`${this.apiUrl}/bulk-deactivate`, ids, { headers }).pipe(
       finalize(() => this.isLoading = false)
     ).subscribe(
       () => {
@@ -403,7 +470,8 @@ export class PromotionListComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.isLoading = true;
-        this.http.post(`${this.apiUrl}/bulk-delete`, ids).pipe(
+        const headers = new HttpHeaders().set('Content-Type', 'application/json');
+        this.http.post(`${this.apiUrl}/bulk-delete`, ids, { headers }).pipe(
           finalize(() => this.isLoading = false)
         ).subscribe(
           () => {
@@ -428,7 +496,7 @@ export class PromotionListComponent implements OnInit {
         promotion.pourcentageReduction,
         format(new Date(promotion.dateDebut), 'yyyy-MM-dd'),
         format(new Date(promotion.dateFin), 'yyyy-MM-dd'),
-        promotion.conditionPromotion,
+        promotion.conditionPromotion || 'N/A',
         promotion.active ? 'Oui' : 'Non'
       ];
       csvRows.push(row.join(','));
@@ -461,12 +529,12 @@ export class PromotionListComponent implements OnInit {
       this.clearMessages();
       return false;
     }
-    if (!promotion.conditionPromotion) {
-      this.errorMessage = 'La condition est requise.';
-      this.clearMessages();
-      return false;
-    }
     return true;
+  }
+
+  calculateDiscountedPrice(originalPrice: number, pourcentageReduction: number): number {
+    const discount = (originalPrice * pourcentageReduction) / 100;
+    return Number((originalPrice - discount).toFixed(2));
   }
 
   formatDateForInput(date: Date | string): string {
@@ -508,25 +576,30 @@ export class PromotionListComponent implements OnInit {
       return;
     }
     this.isLoading = true;
-    this.http.put<Promotion>(`${this.apiUrl}/${id}`, { ...this.promotions.find(p => p.id === id), active: true }).pipe(
+    const headers = new HttpHeaders().set('Content-Type', 'application/json');
+    this.http.put<Promotion>(`${this.apiUrl}/${id}`, { ...this.promotions.find(p => p.id === id), active: true }, { headers }).pipe(
       finalize(() => this.isLoading = false)
     ).subscribe(
       updatedPromotion => {
         updatedPromotion.id = Number(updatedPromotion.id);
         updatedPromotion.dateDebut = new Date(updatedPromotion.dateDebut);
         updatedPromotion.dateFin = new Date(updatedPromotion.dateFin);
+        updatedPromotion.produits = updatedPromotion.produits?.map((prod: any) => ({
+          ...prod,
+          prix: Number(prod.prix),
+          devise: prod.devise || 'TND'
+        }));
         const index = this.promotions.findIndex(p => p.id === updatedPromotion.id);
         if (index !== -1) {
           this.promotions[index] = updatedPromotion;
         }
         this.applyFilters();
         this.showSuccess('Suggestion IA acceptée !');
-        this.promotionUpdateService.notifyUpdates(); // Notification
+        this.promotionUpdateService.notifyUpdates();
       },
       error => this.handleError('Échec de l’acceptation de la suggestion IA', error)
     );
   }
-
 
   rejectAISuggestion(id: number): void {
     const promotion = this.promotions.find(p => p.id === id);

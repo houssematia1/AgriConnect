@@ -19,6 +19,7 @@ import { UserListComponent } from './user-list/user-list.component';
 import { UserEditComponent } from './user-edit/user-edit.component';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ProduitExpirationListComponent } from './produit-expiration-list/produit-expiration-list.component';
 
 
 const routes: Routes = [
@@ -40,7 +41,8 @@ const routes: Routes = [
     InscriptionComponent,
     LoginComponent,
     UserListComponent,
-    UserEditComponent
+    UserEditComponent,
+    ProduitExpirationListComponent
   ],
   imports: [
     BrowserModule,

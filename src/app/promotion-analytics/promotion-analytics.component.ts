@@ -1,138 +1,104 @@
-import { Component, OnInit } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { ChartConfiguration, ChartData } from 'chart.js';
-import { finalize } from 'rxjs/operators';
-import { PromotionUpdateService } from '../services/promotion/promotion-update.service';
-
-interface PromotionStats {
-  totalPromotions: number;
-  activePromotions: number;
-  expiredPromotions: number;
-  totalPromotionsApplied: number;
-}
+import { Component, OnInit, AfterViewChecked } from '@angular/core';
+import { PromotionService, AnalyticsSummary } from '../services/promotion.service';
+import { ChartConfiguration } from 'chart.js';
+import { CountUp } from 'countup.js';
 
 @Component({
   selector: 'app-promotion-analytics',
   templateUrl: './promotion-analytics.component.html',
   styleUrls: ['./promotion-analytics.component.css']
 })
-export class PromotionAnalyticsComponent implements OnInit {
-  barChartData: ChartData<'bar'> = {
-    labels: ['Total', 'Actives', 'Expirées'],
-    datasets: [
-      {
-        data: [0, 0, 0],
-        label: 'Nombre de promotions',
-        backgroundColor: ['#3b82f6', '#10b981', '#ef4444'],
-        borderColor: ['#2563eb', '#059669', '#dc2626'],
-        borderWidth: 1
-      }
-    ]
+export class PromotionAnalyticsComponent implements OnInit, AfterViewChecked {
+  isLoading = true;
+  errorMessage: string | null = null;
+
+  totalPromotions = 0;
+  activePromotions = 0;
+  expiredPromotions = 0;
+  totalPromotionsApplied = 0;
+  isChartDataEmpty = true;
+
+  barChartData: ChartConfiguration<'bar'>['data'] = {
+    labels: [],
+    datasets: []
   };
 
-  barChartOptions: ChartConfiguration['options'] = {
+  barChartOptions: ChartConfiguration<'bar'>['options'] = {
     responsive: true,
     scales: {
-      x: {},
       y: {
         beginAtZero: true,
-        ticks: {
-          stepSize: 1,
-          precision: 0
+        title: {
+          display: true,
+          text: 'Nombre d\'applications'
+        }
+      },
+      x: {
+        title: {
+          display: true,
+          text: 'Promotions'
         }
       }
     },
     plugins: {
-      legend: { display: true },
-      tooltip: {
-        callbacks: {
-          label: (context) => `${context.dataset.label}: ${context.raw}`
-        }
+      legend: {
+        display: true
       }
     }
   };
 
-  totalPromotions: number = 0;
-  activePromotions: number = 0;
-  expiredPromotions: number = 0;
-  totalPromotionsApplied: number = 0;
-  isLoading = false;
-  errorMessage: string | null = null;
-  isChartDataEmpty: boolean = true; // New property to track if chart data is all zeros
+  private countersAnimated = false;
 
-  private apiUrl = 'http://localhost:8082/promotions';
-
-  constructor(
-    private http: HttpClient,
-    private promotionUpdateService: PromotionUpdateService
-  ) {}
+  constructor(private promotionService: PromotionService) {}
 
   ngOnInit(): void {
     this.loadAnalytics();
-    this.setupUpdateListener(); 
-  }
-  private setupUpdateListener(): void {
-    this.promotionUpdateService.updates$.subscribe(() => {
-      this.loadAnalytics();
-    });
-  }
-  loadAnalytics(): void {
-    this.isLoading = true;
-    const statsEndpoint = `${this.apiUrl}/analytics`;
-    console.log('Fetching analytics from:', statsEndpoint);
-    this.http.get<PromotionStats>(statsEndpoint).pipe(
-      finalize(() => {
-        this.isLoading = false;
-        console.log('Request completed, isLoading:', this.isLoading);
-      })
-    ).subscribe({
-      next: (stats) => this.handleSuccess(stats),
-      error: (error) => this.handleError(error)
-    });
   }
 
-  private handleSuccess(stats: PromotionStats): void {
-    console.log('Received analytics data (stringified):', JSON.stringify(stats, null, 2));
-    console.log('Parsed values - totalPromotions:', stats.totalPromotions, 'activePromotions:', stats.activePromotions, 'expiredPromotions:', stats.expiredPromotions, 'totalPromotionsApplied:', stats.totalPromotionsApplied);
-
-    // Update individual properties for the statistics cards
-    this.totalPromotions = stats.totalPromotions || 0;
-    this.activePromotions = stats.activePromotions || 0;
-    this.expiredPromotions = stats.expiredPromotions || 0;
-    this.totalPromotionsApplied = stats.totalPromotionsApplied || 0;
-
-    // Update chart data
-    this.barChartData = {
-      ...this.barChartData,
-      datasets: [{
-        ...this.barChartData.datasets[0],
-        data: [
-          this.totalPromotions,
-          this.activePromotions,
-          this.expiredPromotions
-        ]
-      }]
-    };
-    console.log('Updated barChartData:', this.barChartData.datasets[0].data);
-
-    // Check if all chart data values are 0
-    this.isChartDataEmpty = this.barChartData.datasets[0].data.every(value => value === 0);
-
-    if (stats.totalPromotions === 0) {
-      this.errorMessage = 'Aucune donnée disponible';
-      this.clearMessages();
+  ngAfterViewChecked(): void {
+    if (!this.countersAnimated && !this.isLoading && !this.errorMessage) {
+      this.animateCounters();
+      this.countersAnimated = true;
     }
   }
 
-  private handleError(error: HttpErrorResponse): void {
-    console.error('Error:', error);
-    this.errorMessage = error.status === 204 
-      ? 'Aucune donnée trouvée' 
-      : `Erreur ${error.status}: ${error.message}`;
-    this.clearMessages();
+  loadAnalytics(): void {
+    this.isLoading = true;
+    this.errorMessage = null;
+    this.countersAnimated = false;
+
+    this.promotionService.getAnalytics().subscribe({
+      next: (data: AnalyticsSummary) => {
+        console.log('Données reçues :', data); // Log des données pour vérification
+
+        this.totalPromotions = data.totalPromotions;
+        this.activePromotions = data.activePromotions;
+        this.expiredPromotions = data.expiredPromotions;
+        this.totalPromotionsApplied = data.totalPromotionsApplied;
+
+        this.barChartData = {
+          labels: data.chartData.labels,
+          datasets: data.chartData.datasets
+        };
+
+        console.log('barChartData :', this.barChartData); // Log de barChartData
+
+        this.isChartDataEmpty = !data.chartData.labels.length || !data.chartData.datasets.length;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        this.errorMessage = error.message || 'Une erreur est survenue lors du chargement des données.';
+        this.isLoading = false;
+      }
+    });
   }
 
-  private clearMessages(): void {
-    setTimeout(() => this.errorMessage = null, 5000);
+  animateCounters(): void {
+    const options = { duration: 2 };
+
+    new CountUp('totalPromotions', this.totalPromotions, options).start();
+    new CountUp('activePromotions', this.activePromotions, options).start();
+    new CountUp('expiredPromotions', this.expiredPromotions, options).start();
+    new CountUp('totalApplied', this.totalPromotionsApplied, options).start();
   }
 }

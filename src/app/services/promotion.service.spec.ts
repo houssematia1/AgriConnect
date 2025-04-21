@@ -1,18 +1,12 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { NgChartsModule } from 'ng2-charts';
-import { CommonModule } from '@angular/common';
+import { PromotionService, AnalyticsResponse, Promotion, AnalyticsSummary } from './promotion.service';
 
-import { PromotionAnalyticsComponent } from './promotion-analytics.component';
-import { PromotionService, AnalyticsResponse, Promotion } from '../services/promotion.service'; // Fixed import path
-
-describe('PromotionAnalyticsComponent', () => {
-  let component: PromotionAnalyticsComponent;
-  let fixture: ComponentFixture<PromotionAnalyticsComponent>;
+describe('PromotionService', () => {
+  let service: PromotionService;
   let httpMock: HttpTestingController;
 
+  // Mock data for testing
   const mockPromotions: Promotion[] = [
     { id: 1, nom: 'Black Friday', pourcentageReduction: 20, dateDebut: '2024-11-01', dateFin: '2024-11-30', conditionPromotion: 'MONTANT_MIN', active: true },
     { id: 2, nom: 'Expiration Discount', pourcentageReduction: 40, dateDebut: '2025-04-01', dateFin: '2025-04-10', conditionPromotion: 'EXPIRATION_PRODUIT', active: false }
@@ -32,19 +26,11 @@ describe('PromotionAnalyticsComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [PromotionAnalyticsComponent],
-      imports: [
-        HttpClientTestingModule,
-        MatIconModule,
-        MatProgressSpinnerModule,
-        NgChartsModule,
-        CommonModule
-      ],
+      imports: [HttpClientTestingModule], // Add HttpClientTestingModule
       providers: [PromotionService]
     });
 
-    fixture = TestBed.createComponent(PromotionAnalyticsComponent);
-    component = fixture.componentInstance;
+    service = TestBed.inject(PromotionService);
     httpMock = TestBed.inject(HttpTestingController);
   });
 
@@ -52,40 +38,47 @@ describe('PromotionAnalyticsComponent', () => {
     httpMock.verify(); // Ensure no outstanding HTTP requests
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  it('should be created', () => {
+    expect(service).toBeTruthy();
   });
 
-  it('should load analytics data successfully', () => {
-    fixture.detectChanges(); // Trigger ngOnInit
+  it('should fetch analytics data successfully', () => {
+    service.getAnalytics().subscribe((result: AnalyticsSummary) => {
+      expect(result).toBeDefined();
+      expect(result.totalPromotions).toBe(2); // 2 promotions
+      expect(result.activePromotions).toBe(1); // 1 active promotion
+      expect(result.expiredPromotions).toBe(1); // 1 expired (Expiration Discount ended 2025-04-10, today is 2025-04-19)
+      expect(result.totalPromotionsApplied).toBe(15);
+      expect(result.chartData.labels).toEqual(['Black Friday', 'Expiration Discount']);
+      expect(result.chartData.datasets[0].data).toEqual([5, 10]);
+    });
 
     // Mock the three HTTP requests
     const analyticsReq = httpMock.expectOne('http://localhost:8082/promotions/analytics');
+    expect(analyticsReq.request.method).toBe('GET');
     analyticsReq.flush(mockAnalytics);
 
     const allPromotionsReq = httpMock.expectOne('http://localhost:8082/promotions');
+    expect(allPromotionsReq.request.method).toBe('GET');
     allPromotionsReq.flush(mockPromotions);
 
     const activePromotionsReq = httpMock.expectOne('http://localhost:8082/promotions/actives');
+    expect(activePromotionsReq.request.method).toBe('GET');
     activePromotionsReq.flush(mockActivePromotions);
-
-    fixture.detectChanges();
-
-    expect(component.isLoading).toBeFalse();
-    expect(component.errorMessage).toBeNull();
-    expect(component.totalPromotions).toBe(2); // 2 promotions
-    expect(component.activePromotions).toBe(1); // 1 active promotion
-    expect(component.expiredPromotions).toBe(1); // 1 expired (Expiration Discount ended 2025-04-10, today is 2025-04-19)
-    expect(component.totalPromotionsApplied).toBe(15);
-    expect(component.barChartData.labels).toEqual(['Black Friday', 'Expiration Discount']);
-    expect(component.barChartData.datasets[0].data).toEqual([5, 10]);
-    expect(component.isChartDataEmpty).toBeFalse();
   });
 
-  it('should handle error when loading analytics data', () => {
-    fixture.detectChanges(); // Trigger ngOnInit
+  it('should handle errors when fetching analytics data', () => {
+    service.getAnalytics().subscribe((result: AnalyticsSummary) => {
+      expect(result).toBeDefined();
+      expect(result.totalPromotions).toBe(0);
+      expect(result.activePromotions).toBe(0);
+      expect(result.expiredPromotions).toBe(0);
+      expect(result.totalPromotionsApplied).toBe(0);
+      expect(result.chartData.labels).toEqual([]);
+      expect(result.chartData.datasets).toEqual([]);
+    });
 
-    // Mock errors for all requests (fixed port to 8082)
+    // Mock errors for all requests
     const analyticsReq = httpMock.expectOne('http://localhost:8082/promotions/analytics');
     analyticsReq.flush(null, { status: 500, statusText: 'Server Error' });
 
@@ -94,27 +87,20 @@ describe('PromotionAnalyticsComponent', () => {
 
     const activePromotionsReq = httpMock.expectOne('http://localhost:8082/promotions/actives');
     activePromotionsReq.flush(null, { status: 500, statusText: 'Server Error' });
-
-    fixture.detectChanges();
-
-    expect(component.isLoading).toBeFalse();
-    expect(component.errorMessage).toBeNull(); // Service handles error by returning default values
-    expect(component.totalPromotions).toBe(0);
-    expect(component.activePromotions).toBe(0);
-    expect(component.expiredPromotions).toBe(0);
-    expect(component.totalPromotionsApplied).toBe(0);
-    expect(component.isChartDataEmpty).toBeTrue();
   });
 
-  it('should set isChartDataEmpty to true when chart data is empty', () => {
+  it('should return empty chart data when promotionStats is empty', () => {
     const emptyAnalytics: AnalyticsResponse = {
       totalPromotionsApplied: 0,
       promotionStats: []
     };
 
-    fixture.detectChanges(); // Trigger ngOnInit
+    service.getAnalytics().subscribe((result: AnalyticsSummary) => {
+      expect(result.chartData.labels).toEqual([]);
+      expect(result.chartData.datasets).toEqual([ { label: 'Applications', data: [] } ]);
+    });
 
-    // Mock requests (fixed port to 8082)
+    // Mock the requests
     const analyticsReq = httpMock.expectOne('http://localhost:8082/promotions/analytics');
     analyticsReq.flush(emptyAnalytics);
 
@@ -123,9 +109,5 @@ describe('PromotionAnalyticsComponent', () => {
 
     const activePromotionsReq = httpMock.expectOne('http://localhost:8082/promotions/actives');
     activePromotionsReq.flush(mockActivePromotions);
-
-    fixture.detectChanges();
-
-    expect(component.isChartDataEmpty).toBeTrue();
   });
 });
