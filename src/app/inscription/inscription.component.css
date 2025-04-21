@@ -6,48 +6,76 @@ body {
 }
 
 .inscription-form {
-  max-width: 500px;
+  max-width: 520px;
   margin: 50px auto;
-  padding: 40px 30px;
+  padding: 40px;
   background: #ffffff;
   border-radius: 20px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   border-top: 5px solid #4caf50;
-  position: relative;
-  animation: fadeIn 0.8s ease-in-out;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.inscription-form::before {
-  content: "";
-  position: absolute;
-  top: -5px;
-  left: -5px;
-  right: -5px;
-  bottom: -5px;
-  border-radius: 22px;
-  pointer-events: none;
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
-}
-
-.inscription-form h2 {
+h2 {
   text-align: center;
   margin-bottom: 25px;
   color: #2e7d32;
   font-weight: 600;
 }
 
-.inscription-form form {
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 25px;
+  gap: 15px;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 26px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  background-color: #ccc;
+  border-radius: 26px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  transition: 0.4s;
+}
+
+.slider:before {
+  content: "";
+  position: absolute;
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+.switch input:checked + .slider {
+  background-color: #4caf50;
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(24px);
+}
+
+form {
   display: flex;
   flex-direction: column;
   gap: 15px;
@@ -66,48 +94,41 @@ body {
 
 .form-group input,
 .form-group select {
-  padding: 12px;
+  padding: 10px;
   border: 1px solid #c8e6c9;
   border-radius: 8px;
   font-size: 14px;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.form-group input:focus,
-.form-group select:focus {
-  outline: none;
-  border-color: #4caf50;
-  box-shadow: 0 0 4px rgba(76, 175, 80, 0.4);
-}
-
-.error {
-  color: #d32f2f;
-  font-size: 12px;
-  margin-top: 4px;
-}
-
-.btn-submit {
+.btn-submit,
+.btn-secondary {
   padding: 12px;
-  border: none;
-  border-radius: 8px;
   background: linear-gradient(to right, #66bb6a, #388e3c);
+  border: none;
+  border-radius: 10px;
   color: white;
-  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.3s ease;
-  align-self: center;
 }
 
-.btn-submit:hover {
+.btn-submit:hover,
+.btn-secondary:hover {
   background: linear-gradient(to right, #57a35f, #2e7d32);
 }
 
+video {
+  border: 2px solid #cce3cc;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  transform: scaleX(-1);
+  object-fit: cover;
+}
+
 .message {
+  margin-top: 10px;
+  font-weight: 500;
   text-align: center;
-  margin-top: 15px;
   color: #2e7d32;
-  font-size: 14px;
 }
 
 .link-message {
@@ -119,12 +140,6 @@ body {
 
 .link-message a {
   color: #388e3c;
-  text-decoration: none;
   font-weight: 600;
-  transition: color 0.2s ease;
-}
-
-.link-message a:hover {
-  color: #2e7d32;
-  text-decoration: underline;
+  text-decoration: none;
 }

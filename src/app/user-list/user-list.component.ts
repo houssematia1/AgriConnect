@@ -1,6 +1,36 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
-import { UserService, User } from '../user.service';
+import { UserService } from '../user.service';
+
+interface User {
+  id: number;
+  nom: string;
+  prenom: string;
+  email: string;
+  role: string;
+  photo?: string;
+  isBlocked?: boolean;
+  phone?: string;
+  location?: string;
+  joinDate?: string;
+  department?: string;
+  projectsCount?: number;
+  tasksCompleted?: number;
+  rating?: number;
+  gallery?: string[];
+  achievements?: string[];
+}
+
+export interface ExtendedUser {
+  id: number;
+  nom: string;
+  prenom: string;
+  email: string;
+  role: string;
+  isBlocked?: boolean;
+  photo?: string;
+  risk_score?: number;
+}
 
 @Component({
   selector: 'app-user-list',
@@ -8,8 +38,8 @@ import { UserService, User } from '../user.service';
   styleUrls: ['./user-list.component.css']
 })
 export class UserListComponent implements OnInit {
-  users: User[] = [];
-  allUsers: User[] = [];
+  users: ExtendedUser[] = [];
+  allUsers: ExtendedUser[] = [];
   searchTerm: string = '';
   selectedRole: string = 'all';
   totalUsers: number = 0;
@@ -19,6 +49,18 @@ export class UserListComponent implements OnInit {
   pages: number[] = [];
   isSidebarOpen: boolean = true;
 
+  currentUser: ExtendedUser = {
+    id: 0,
+    nom: '',
+    prenom: '',
+    email: '',
+    role: '',
+    photo: ''
+  };
+  showProfileMenu: boolean = false;
+
+  notificationMessage: string | null = null;
+
   constructor(
     private userService: UserService,
     private router: Router,
@@ -27,37 +69,93 @@ export class UserListComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadUsers();
-  }
+    const stored = localStorage.getItem('currentUser');
+    if (stored) {
+      const userData = JSON.parse(stored);
+      this.currentUser = {
+        ...userData
+      };
+    }
 
-  toggleSidebar(): void {
-    this.isSidebarOpen = !this.isSidebarOpen;
+    const analysis = localStorage.getItem('faceAnalysis');
+    if (analysis) {
+      const parsed = JSON.parse(analysis);
+      const mood = parsed.expression?.toLowerCase() || 'neutre';
+      const suggestion = this.getSuggestion(mood);
+      this.notificationMessage = `👋 Bonjour ${this.currentUser.nom}, vous semblez ${mood} aujourd'hui. ${suggestion}`;
+      localStorage.removeItem('faceAnalysis');
+
+      setTimeout(() => {
+        this.notificationMessage = null;
+        this.cdr.detectChanges();
+      }, 7000);
+    }
   }
 
   loadUsers(): void {
     this.userService.getUsers().subscribe(users => {
-      this.allUsers = users;
+      this.allUsers = users.map(user => {
+        const baseUser = user as User;
+        const extendedUser: ExtendedUser = {
+          id: baseUser.id,
+          nom: baseUser.nom,
+          prenom: baseUser.prenom,
+          email: baseUser.email,
+          role: baseUser.role,
+          isBlocked: baseUser.isBlocked || false,
+          photo: baseUser.photo,
+          risk_score: undefined
+        };
+        return extendedUser;
+      });
+
+      this.users = [...this.allUsers];
       this.totalUsers = users.length;
-  
-      // Charger les scores IA pour chaque utilisateur
-      users.forEach(user => {
+
+      this.allUsers.forEach(user => {
         this.userService.getRiskScore(user.id).subscribe({
           next: res => {
-            user.risk_score = res.risk_score;
-            this.applyFilters(); // Re-filtrer après réception du score
+            const index = this.allUsers.findIndex(u => u.id === user.id);
+            if (index !== -1) {
+              this.allUsers[index].risk_score = res.risk_score;
+              this.filterUsers();
+            }
           },
           error: () => {
-            user.risk_score = undefined;
-            this.applyFilters();
+            const index = this.allUsers.findIndex(u => u.id === user.id);
+            if (index !== -1) {
+              this.allUsers[index].risk_score = undefined;
+              this.filterUsers();
+            }
           }
         });
       });
-  
-      this.applyFilters();
+
+      this.filterUsers();
     });
   }
-  
 
-  applyFilters(): void {
+  getSuggestion(mood: string): string {
+    switch (mood) {
+      case 'happy': return '🍓 Une fraise pour garder le sourire !';
+      case 'sad': return '🍌 Une banane pour retrouver la pêche.';
+      case 'neutral': return '🍏 Une pomme par jour éloigne le médecin !';
+      case 'angry': return '🥕 Une carotte pour se calmer un peu ?';
+      case 'surprised': return '🍍 Un ananas pour fêter ça ?';
+      default: return '🍇 Quelques raisins pour se détendre.';
+    }
+  }
+
+  toggleProfileMenu(): void {
+    this.showProfileMenu = !this.showProfileMenu;
+  }
+
+  onGoToMyAccount(): void {
+    this.showProfileMenu = false;
+    this.router.navigate(['/my-account']);
+  }
+
+  filterUsers(): void {
     let filtered = [...this.allUsers];
 
     if (this.selectedRole !== 'all') {
@@ -83,41 +181,41 @@ export class UserListComponent implements OnInit {
 
   onSearch(): void {
     this.page = 1;
-    this.applyFilters();
+    this.filterUsers();
   }
 
   onRoleChange(): void {
     this.page = 1;
-    this.applyFilters();
+    this.filterUsers();
   }
 
   goToPage(p: number): void {
     this.page = p;
-    this.applyFilters();
+    this.filterUsers();
   }
 
   nextPage(): void {
     if (this.page < this.pages.length) {
       this.page++;
-      this.applyFilters();
+      this.filterUsers();
     }
   }
 
   prevPage(): void {
     if (this.page > 1) {
       this.page--;
-      this.applyFilters();
+      this.filterUsers();
     }
   }
 
-  onUpdateUser(user: User): void {
+  onUpdateUser(user: ExtendedUser): void {
     this.router.navigate(['/users/edit', user.id]);
   }
 
-  onDeleteUser(user: User): void {
+  onDeleteUser(user: ExtendedUser): void {
     if (confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
       this.userService.deleteUser(user.id).subscribe(() => {
-        this.loadUsers();
+        this.filterUsers();
       });
     }
   }
@@ -127,23 +225,42 @@ export class UserListComponent implements OnInit {
   }
 
   onLogout(): void {
+    this.userService.logoutBackend();
     localStorage.removeItem('currentUser');
     this.router.navigate(['/login']);
   }
 
-  onBlockUser(user: User): void {
+  onBlockUser(user: ExtendedUser): void {
     if (confirm(`Voulez-vous bloquer ${user.nom} ${user.prenom} ?`)) {
       this.userService.blockUser(user.id, true).subscribe(() => {
-        this.loadUsers();
+        this.filterUsers();
       });
     }
   }
 
-  onUnblockUser(user: User): void {
+  onUnblockUser(user: ExtendedUser): void {
     if (confirm(`Voulez-vous débloquer ${user.nom} ${user.prenom} ?`)) {
       this.userService.blockUser(user.id, false).subscribe(() => {
-        this.loadUsers();
+        this.filterUsers();
       });
+    }
+  }
+
+  getUserPhotoUrl(user: ExtendedUser): string {
+    if (!user.photo) {
+        return 'assets/images/avatar.png';
+    }
+    return `http://localhost:8082/api/users/photo/${user.photo}`;
+  }
+
+  toggleSidebar(): void {
+    this.isSidebarOpen = !this.isSidebarOpen;
+  }
+
+  handleImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    if (img) {
+      img.src = 'assets/images/avatar.png';
     }
   }
 }

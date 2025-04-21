@@ -10,8 +10,11 @@ import { UserFormComponent } from './user-form/user-form.component';
 import { VerifyAccountComponent } from './verify-account/verify-account.component';
 import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './reset-password/reset-password.component';
-import { UserStatsComponent } from './user-stats/user-stats.component'; // ✅ ajout stats
+import { DashboardComponent } from './dashboard/dashboard.component';
 import { AdminGuard } from './guards/admin.guard';
+import { FaceAuthComponent } from './face-auth/face-auth.component';
+import { MyAccountComponent } from './my-account/my-account.component';
+import { PhotoUploadTestComponent } from './photo-upload-test/photo-upload-test.component'; // ✅ à ajouter
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -20,10 +23,15 @@ const routes: Routes = [
   { path: 'verify', component: VerifyAccountComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'reset-password', component: ResetPasswordComponent },
-  { path: 'stats', component: UserStatsComponent, canActivate: [AdminGuard] }, // ✅ route stats protégée
+  { path: 'stats', component: DashboardComponent, canActivate: [AdminGuard] },
   { path: 'users', component: UserListComponent, canActivate: [AdminGuard] },
   { path: 'users/add', component: UserFormComponent, canActivate: [AdminGuard] },
   { path: 'users/edit/:id', component: UserEditComponent, canActivate: [AdminGuard] },
+  { path: 'face-auth', component: FaceAuthComponent },
+  { path: 'my-account', component: MyAccountComponent },
+  { path: 'test-upload', component: PhotoUploadTestComponent }, // ✅ nouvelle route
+
+  // redirection par défaut
   { path: '**', redirectTo: '' }
 ];
 

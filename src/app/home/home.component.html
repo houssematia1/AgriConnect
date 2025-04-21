@@ -107,6 +107,7 @@
             <li class="list-group-item d-flex justify-content-between lh-sm">
               <div>
                 <h6 class="my-0">Fresh grapes</h6>
+                
                 <small class="text-body-secondary">Brief description</small>
               </div>
               <span class="text-body-secondary">$8</span>
@@ -321,23 +322,56 @@
           
           <div class="col-sm-8 col-lg-2 d-flex gap-5 align-items-center justify-content-center justify-content-sm-end">
             <ul class="d-flex justify-content-end list-unstyled m-0">
-                <li>
-                    <a routerLink="/login" class="p-2 mx-1">
-                      <svg width="24" height="24"><use xlink:href="#user"></use></svg>
-                    </a>
-                  </li>
+          
+              <!-- 🔑 Bouton login (si non connecté) -->
+              <li *ngIf="!isLoggedIn">
+                <a routerLink="/login" class="p-2 mx-1" title="Connexion">
+                  <svg width="24" height="24"><use xlink:href="#user"></use></svg>
+                </a>
+              </li>
+          
+              <!-- 👤 Menu déroulant avec image utilisateur -->
+              <li *ngIf="isLoggedIn" class="position-relative" (click)="toggleProfileMenu()">
+                <div class="profile-icon-wrapper p-2 mx-1" title="Mon compte">
+                  <img
+                    [src]="getUserPhotoUrl(currentUser)"
+                    alt="Profil"
+                    class="rounded-circle nav-avatar shadow-sm"
+                    width="48"
+                    height="48"
+                    style="object-fit: cover; border: 2px solid #007bff;"
+                  />
+                </div>
+              
+                <!-- 🔽 Dropdown -->
+                <div *ngIf="showProfileMenu" class="profile-menu-dropdown">
+                  <p class="fw-bold mb-1">{{ currentUser.nom }} {{ currentUser.prenom }}</p>
+                  <p class="text-muted small mb-2">{{ currentUser.email }}</p>
+                  <hr class="my-1" />
+                  <button (click)="onGoToMyAccount()" class="dropdown-btn">⚙️ Modifier mes infos</button>
+                  <button (click)="onLogout()" class="dropdown-btn">⎋ Déconnexion</button>
+                </div>
+              </li>
+              
+          
+              <!-- ❤️ Wishlist -->
               <li>
                 <a href="#" class="p-2 mx-1">
                   <svg width="24" height="24"><use xlink:href="#wishlist"></use></svg>
                 </a>
               </li>
+          
+              <!-- 🛍️ Panier -->
               <li>
-                <a href="#" class="p-2 mx-1" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCart" aria-controls="offcanvasCart">
+                <a href="#" class="p-2 mx-1" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCart">
                   <svg width="24" height="24"><use xlink:href="#shopping-bag"></use></svg>
                 </a>
               </li>
+          
             </ul>
           </div>
+          
+          
 
         </div>
       </div>
@@ -433,7 +467,8 @@
           <div class="col-md-12">
 
             <div class="section-header d-flex flex-wrap justify-content-between mb-5">
-              <h2 class="section-title">Category</h2>
+              <p>📸 Nom de la photo : {{ currentUser.photo }}</p>
+
 
               <div class="d-flex align-items-center">
                 <a href="#" class="btn btn-primary me-2">View All</a>

@@ -1,13 +1,116 @@
 <div class="layout">
-  <!-- Contenu principal -->
-  <div class="main-content">
+  <!-- Sidebar -->
+  <div class="sidebar" [class.closed]="!isSidebarOpen">
+    <div class="sidebar-header">
+      <h2 style="margin: 0; color: #2E7D32; font-size: 1.5rem;">AgriConnect</h2>
+      <button class="toggle-btn" (click)="toggleSidebar()">
+        <span>{{ isSidebarOpen ? '←' : '→' }}</span>
+      </button>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active">
+        <span class="nav-icon">👥</span>
+        <span class="nav-text">Utilisateurs</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">🥕</span>
+        <span class="nav-text">Produits</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">🚚</span>
+        <span class="nav-text">Livraisons</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">📊</span>
+        <span class="nav-text">Statistiques</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">⚙️</span>
+        <span class="nav-text">Paramètres</span>
+      </a>
+    </nav>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content" [class.sidebar-closed]="!isSidebarOpen">
+    <!-- Notification humeur -->
+    <!-- Notification en haut à droite -->
+    <div class="floating-toast" *ngIf="notificationMessage">
+      {{ notificationMessage }}
+    </div>
+
     <div class="user-list-wrapper">
+      <!-- Header -->
       <div class="list-header">
-        <h2>AgriConnect 🌱</h2>
-        <button class="btn-primary" (click)="onAddUser()">+ Ajouter</button>
-        <button class="btn logout" (click)="onLogout()">⎋ Déconnexion</button>
+        <h2>Liste des utilisateurs</h2>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+          <button class="btn-primary" (click)="onAddUser()">+ Ajouter</button>
+          <button class="btn logout" (click)="onLogout()">⎋ Déconnexion</button>
+
+          <!-- Profile container -->
+          <div class="profile-container" (click)="toggleProfileMenu()">
+            <img
+              class="profile-icon"
+              [src]="getUserPhotoUrl(currentUser)"
+              alt="Profil"
+              (error)="handleImageError($event)"
+            />
+            <div class="profile-menu" *ngIf="showProfileMenu">
+              <div class="profile-header">
+                <img [src]="getUserPhotoUrl(currentUser)" 
+                     alt="Profile" 
+                     class="avatar"
+                     (error)="handleImageError($event)">
+                <h3 class="name">{{currentUser.nom}} {{currentUser.prenom}}</h3>
+                <p class="email">{{currentUser.email}}</p>
+                <span class="role">{{currentUser.role}}</span>
+              </div>
+              
+              <div class="profile-content">
+                <div class="profile-section" (click)="onGoToMyAccount()" style="cursor: pointer;">
+                  <h4 class="section-title">Informations Personnelles</h4>
+                  <div class="info-grid">
+                    <div class="info-item">
+                      <span class="info-label">Nom complet</span>
+                      <span class="info-value">{{currentUser.nom}} {{currentUser.prenom}}</span>
+                    </div>
+                    <div class="info-item">
+                      <span class="info-label">Email</span>
+                      <span class="info-value">{{currentUser.email}}</span>
+                    </div>
+                    <div class="info-item">
+                      <span class="info-label">Rôle</span>
+                      <span class="info-value">{{currentUser.role}}</span>
+                    </div>
+                    <div class="info-item">
+                      <span class="info-label">Statut</span>
+                      <span class="info-value" [ngStyle]="{'color': currentUser.isBlocked ? '#F44336' : '#4CAF50'}">
+                        {{currentUser.isBlocked ? 'Bloqué' : 'Actif'}}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="info-footer" style="margin-top: 15px; text-align: center; color: #666; font-size: 0.9em;">
+                    Cliquez pour voir plus de détails
+                  </div>
+                </div>
+
+                <div class="action-buttons">
+                  <button class="profile-action-btn" (click)="onGoToMyAccount()">
+                    <i class="fas fa-edit"></i>
+                    Modifier le profil
+                  </button>
+                  <button class="profile-action-btn secondary" (click)="onLogout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Déconnexion
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
+      <!-- Filtres -->
       <div class="filters">
         <input
           type="text"
@@ -23,6 +126,7 @@
         </select>
       </div>
 
+      <!-- Tableau utilisateurs -->
       <div class="table-container">
         <table class="styled-table">
           <thead>
@@ -41,8 +145,9 @@
               <td>{{ i + 1 }}</td>
               <td class="user-cell">
                 <img class="avatar"
-                     src="https://ui-avatars.com/api/?name={{ user.nom }}+{{ user.prenom }}&background=0D8ABC&color=fff"
-                     alt="avatar" />
+                     [src]="user.photo ? 'http://localhost:8082/uploads/' + user.photo : 'https://ui-avatars.com/api/?name=' + user.nom + '+' + user.prenom + '&background=0D8ABC&color=fff'"
+                     alt="avatar"
+                     onerror="this.src='https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff'" />
                 <div>
                   <div class="name">{{ user.nom }} {{ user.prenom }}</div>
                 </div>
@@ -76,6 +181,7 @@
         </table>
       </div>
 
+      <!-- Pagination -->
       <div class="list-footer">
         <span>Affichage de {{ users.length }} utilisateurs</span>
         <div class="pagination">

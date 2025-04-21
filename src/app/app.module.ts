@@ -1,7 +1,8 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';  
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
+
 import { AppRoutingModule } from './app-routing.module';
 
 import { AppComponent } from './app.component';
@@ -14,8 +15,11 @@ import { UserFormComponent } from './user-form/user-form.component';
 import { VerifyAccountComponent } from './verify-account/verify-account.component';
 import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './reset-password/reset-password.component';
-import { UserStatsComponent } from './user-stats/user-stats.component';
-
+import { DashboardComponent } from './dashboard/dashboard.component';
+import { FaceAuthComponent } from './face-auth/face-auth.component';
+import { UserProfileComponent } from './user-profile/user-profile.component';
+import { PhotoUploadTestComponent } from './photo-upload-test/photo-upload-test.component'; // ✅ Ajout
+import { MyAccountComponent } from './my-account/my-account.component';
 
 @NgModule({
   declarations: [
@@ -29,12 +33,16 @@ import { UserStatsComponent } from './user-stats/user-stats.component';
     VerifyAccountComponent,
     ForgotPasswordComponent,
     ResetPasswordComponent,
-    UserStatsComponent,
+    DashboardComponent,
+    FaceAuthComponent,
+    UserProfileComponent,
+    PhotoUploadTestComponent, // ✅ Déclaration ajoutée
+    MyAccountComponent
   ],
   imports: [
     BrowserModule,
     FormsModule,
-    ReactiveFormsModule,  // IMPORTANT : Pour utiliser [formGroup] dans UserEditComponent
+    ReactiveFormsModule,
     HttpClientModule,
     AppRoutingModule
   ],

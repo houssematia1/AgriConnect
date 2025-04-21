@@ -1,81 +1,146 @@
-import { Component, AfterViewInit } from '@angular/core';
+import { Component, AfterViewInit, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { UserService } from '../user.service';
 import anime from 'animejs/lib/anime.es.js';
+import * as faceapi from '@vladmandic/face-api';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent implements AfterViewInit {
-  credentials = {
-    email: '',
-    motDePasse: ''
-  };
+export class LoginComponent implements AfterViewInit, OnInit {
+  credentials = { email: '', motDePasse: '' };
   message = '';
+  distanceScore: number | null = null;
+  videoElement!: HTMLVideoElement;
+  cameraReady = false;
+  modelsLoaded = false;
+  useFaceLogin = false;
+  analysisResult: { age: string, gender: string, expression: string } | null = null;
 
   constructor(private userService: UserService, private router: Router) {}
+
+  ngOnInit(): void {
+    this.loadModels();
+  }
+
+  async loadModels() {
+    try {
+      await faceapi.nets.ssdMobilenetv1.loadFromUri('/assets/models');
+      await faceapi.nets.faceLandmark68Net.loadFromUri('/assets/models');
+      await faceapi.nets.faceRecognitionNet.loadFromUri('/assets/models');
+      this.modelsLoaded = true;
+    } catch (err) {
+      this.message = '❌ Erreur lors du chargement des modèles.';
+    }
+  }
+
+  ngAfterViewInit() {
+    // Animation anime.js si besoin
+  }
+
+  toggleLoginMode() {
+    this.useFaceLogin = !this.useFaceLogin;
+    if (this.useFaceLogin && this.modelsLoaded) {
+      setTimeout(() => this.initCamera(), 200);
+    }
+  }
 
   onSubmit(): void {
     this.userService.login(this.credentials).subscribe(
       (user: any) => {
         this.message = 'Connexion réussie.';
         localStorage.setItem('currentUser', JSON.stringify(user));
-        if (user.role && user.role.trim().toLowerCase() === 'admin') {
-          this.router.navigate(['/users']);
-        } else {
-          this.router.navigate(['/']);
-        }
+        this.redirectAfterLogin(user.role);
       },
       (error: any) => {
-        console.error('Erreur de login :', error);
-        if (error.error && error.error.error) {
-          this.message = error.error.error; // Ex: "Votre compte est bloqué."
-        } else {
-          this.message = 'Erreur inconnue lors de la connexion.';
-        }
+        this.message = error?.error?.error || 'Erreur inconnue lors de la connexion.';
       }
     );
   }
 
-  ngAfterViewInit() {
-    let current: any = null;
-    const emailInput = document.querySelector('#email');
-    const passwordInput = document.querySelector('#password');
-    const submitButton = document.querySelector('#submit');
-
-    if (emailInput) {
-      emailInput.addEventListener('focus', () => {
-        if (current) current.pause();
-        current = anime({
-          targets: 'path',
-          strokeDashoffset: { value: 0, duration: 700, easing: 'easeOutQuart' },
-          strokeDasharray: { value: '240 1386', duration: 700, easing: 'easeOutQuart' }
-        });
-      });
+  redirectAfterLogin(role: string) {
+    console.log("✅ Connexion réussie. Redirection...");
+    if (role?.trim().toLowerCase() === 'admin') {
+      this.router.navigate(['/users']).then(() => window.location.reload());
+    } else {
+      this.router.navigate(['/']).then(() => window.location.reload());
     }
+  }
 
-    if (passwordInput) {
-      passwordInput.addEventListener('focus', () => {
-        if (current) current.pause();
-        current = anime({
-          targets: 'path',
-          strokeDashoffset: { value: -336, duration: 700, easing: 'easeOutQuart' },
-          strokeDasharray: { value: '240 1386', duration: 700, easing: 'easeOutQuart' }
-        });
+  async initCamera() {
+    try {
+      const video = document.getElementById('video') as HTMLVideoElement;
+      if (!video) throw new Error('Élément vidéo non trouvé');
+  
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(device => device.kind === 'videoinput');
+      
+      // Forcer caméra intégrée
+      const selectedDevice = videoDevices.find(device =>
+        device.label.toLowerCase().includes('integrated')
+      ) || videoDevices[0];
+  
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { deviceId: selectedDevice.deviceId }
       });
+  
+      video.srcObject = stream;
+      video.play();
+  
+      this.videoElement = video;
+      this.cameraReady = true;
+      console.log('✅ Caméra intégrée activée');
+    } catch (err) {
+      this.message = '❌ Impossible d’ouvrir la caméra.';
+      console.error(err);
     }
+  }
+  
+  async loginWithFace() {
+    if (!this.cameraReady) {
+      this.message = '❌ Caméra non disponible';
+      return;
+    }
+  
+    const result = await faceapi.detectSingleFace(this.videoElement).withFaceLandmarks().withFaceDescriptor();
+    if (!result) {
+      this.message = '❌ Aucun visage détecté';
+      return;
+    }
+  
+    const descriptor = Array.from(result.descriptor);
+    this.userService.loginWithFace(JSON.stringify(descriptor)).subscribe(
+      (user: any) => {
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        this.captureImage().then((blob) => {
+          this.userService.analyzeFace(blob).subscribe({
+            next: (res) => {
+              localStorage.setItem('faceAnalysis', JSON.stringify(res));
+              this.router.navigate(['/users']);
+            }
+          });
+        });
+      },
+      (error: any) => {
+        this.message = '❌ Échec de la connexion faciale.';
+      }
+    );
+  }
+  
+  
 
-    if (submitButton) {
-      submitButton.addEventListener('focus', () => {
-        if (current) current.pause();
-        current = anime({
-          targets: 'path',
-          strokeDashoffset: { value: -730, duration: 700, easing: 'easeOutQuart' },
-          strokeDasharray: { value: '530 1386', duration: 700, easing: 'easeOutQuart' }
-        });
-      });
-    }
+  captureImage(): Promise<Blob> {
+    const video = document.getElementById('video') as HTMLVideoElement;
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Impossible de dessiner');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    return new Promise((resolve, reject) => {
+      canvas.toBlob((blob) => blob ? resolve(blob) : reject('Erreur de capture'), 'image/jpeg');
+    });
   }
 }

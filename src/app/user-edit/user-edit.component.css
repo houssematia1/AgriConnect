@@ -1,68 +1,56 @@
-.edit-user-container {
-    max-width: 500px;
-    margin: 40px auto;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    font-family: 'Roboto', sans-serif;
-  }
-  
-  .edit-user-container h2 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #333;
-  }
-  
-  .no-user-message {
-    text-align: center;
-    color: #dc3545;
-  }
-  
-  .edit-user-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-  }
-  
-  .form-group {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .form-group label {
-    margin-bottom: 5px;
-    color: #555;
-    font-weight: 500;
-  }
-  
-  .form-group input {
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  }
-  
-  .form-group input:focus {
-    outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 3px rgba(0, 123, 255, 0.3);
-  }
-  
-  .btn-submit {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    background-color: #007bff;
-    color: #fff;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-    align-self: center;
-  }
-  
-  .btn-submit:hover {
-    background-color: #0056b3;
-  }
-  
+.edit-user-form {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 24px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.edit-user-form h2 {
+  text-align: center;
+  color: #007bff;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.actions button {
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.actions .cancel {
+  background-color: #ccc;
+}
+
+.message {
+  margin-top: 20px;
+  text-align: center;
+  font-weight: bold;
+}

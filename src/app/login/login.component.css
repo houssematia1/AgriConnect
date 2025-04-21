@@ -29,6 +29,14 @@ body {
   font-size: 28px;
 }
 
+.login-form h3 {
+  text-align: center;
+  margin: 30px 0 10px;
+  font-size: 18px;
+  color: #388e3c;
+  font-weight: 600;
+}
+
 .form-group {
   margin-bottom: 20px;
 }
@@ -55,7 +63,8 @@ body {
   outline: none;
 }
 
-.btn-submit {
+.btn-submit,
+.btn-secondary {
   width: 100%;
   padding: 12px;
   border: none;
@@ -66,17 +75,24 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: background 0.3s ease;
+  margin-bottom: 15px;
 }
 
-.btn-submit:hover {
+.btn-submit:hover,
+.btn-secondary:hover {
   background: linear-gradient(135deg, #57a35f, #2e7d32);
 }
 
 .message {
+  margin-top: 10px;
+  font-weight: 500;
   text-align: center;
-  margin-top: 20px;
   color: #2e7d32;
   font-size: 14px;
+}
+
+.message.error {
+  color: #dc3545;
 }
 
 .link-message {
@@ -97,12 +113,29 @@ body {
   color: #2e7d32;
   text-decoration: underline;
 }
-.message {
-  margin-top: 10px;
-  font-weight: 500;
-  text-align: center;
+
+video {
+  width: 100%;
+  border: 2px solid #cce3cc;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  transform: scaleX(-1);
+  object-fit: cover;
 }
 
-.message.error {
-  color: #dc3545; /* rouge */
+.score-info {
+  text-align: center;
+  font-size: 15px;
+  color: #2e7d32;
+  margin-bottom: 10px;
+}
+
+.analysis-box {
+  background: #f4fff4;
+  border: 1px solid #c8e6c9;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 15px;
+  font-size: 14px;
+  color: #2e7d32;
 }
