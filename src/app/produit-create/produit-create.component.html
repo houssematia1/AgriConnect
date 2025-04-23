@@ -1,157 +1,84 @@
-<div class="container mt-5">
-  <h2>Créer un Produit</h2>
-  <form (ngSubmit)="onSubmit()" #produitForm="ngForm">
-    <div class="mb-3">
-      <label for="nom" class="form-label">Nom</label>
-      <input
-        type="text"
-        class="form-control"
-        id="nom"
-        name="nom"
-        [(ngModel)]="produit.nom"
-        required
-        #nom="ngModel"
-        [ngClass]="{'is-invalid': nom.invalid && nom.touched}"
-      />
-      <div class="invalid-feedback" *ngIf="nom.invalid && nom.touched">
-        Le nom est requis.
-      </div>
+<div class="container">
+  <h2 class="title">{{ isEditMode ? 'Edit Product' : 'Add a Product' }}</h2>
+  <form (ngSubmit)="onSubmit()" class="form-card">
+    <div class="form-group">
+      <label>Name *</label>
+      <input type="text" [(ngModel)]="produit.nom" name="nom" class="form-control" required>
     </div>
-    <div class="mb-3">
-      <label for="description" class="form-label">Description</label>
-      <textarea
-        class="form-control"
-        id="description"
-        name="description"
-        [(ngModel)]="produit.description"
-      ></textarea>
+
+    <div class="form-group">
+      <label>Description</label>
+      <textarea [(ngModel)]="produit.description" name="description" class="form-control"></textarea>
     </div>
-    <div class="mb-3">
-      <label for="prix" class="form-label">Prix</label>
-      <input
-        type="number"
-        step="0.01"
-        class="form-control"
-        id="prix"
-        name="prix"
-        [(ngModel)]="produit.prix"
-        required
-        min="0"
-        #prix="ngModel"
-        [ngClass]="{'is-invalid': prix.invalid && prix.touched}"
-      />
-      <div class="invalid-feedback" *ngIf="prix.invalid && prix.touched">
-        Le prix doit être supérieur ou égal à 0.
-      </div>
+
+    <div class="form-group">
+      <label>Price *</label>
+      <input type="number" [(ngModel)]="produit.prix" name="prix" class="form-control" required>
     </div>
-    <div class="mb-3">
-      <label for="devise" class="form-label">Devise</label>
-      <input
-        type="text"
-        maxlength="3"
-        class="form-control"
-        id="devise"
-        name="devise"
-        [(ngModel)]="produit.devise"
-        placeholder="ex: XAF"
-      />
+
+    <div class="form-group">
+      <label>Currency</label>
+      <select [(ngModel)]="produit.devise" name="devise" class="form-control">
+        <option value="XAF">XAF</option>
+        <option value="EUR">Euro (EUR)</option>
+        <option value="USD">US Dollar (USD)</option>
+      </select>
     </div>
-    <div class="mb-3">
-      <label for="taxe" class="form-label">Taxe</label>
-      <input
-        type="number"
-        step="0.01"
-        class="form-control"
-        id="taxe"
-        name="taxe"
-        [(ngModel)]="produit.taxe"
-        min="0"
-      />
+
+    <div class="form-group">
+      <label>Tax (%)</label>
+      <input type="number" [(ngModel)]="produit.taxe" name="taxe" class="form-control">
     </div>
-    <div class="mb-3">
-      <label for="dateExpiration" class="form-label">Date d'expiration</label>
-      <input
-        type="date"
-        class="form-control"
-        id="dateExpiration"
-        name="dateExpiration"
-        [(ngModel)]="produit.dateExpiration"
-      />
+
+    <div class="form-group">
+      <label>Expiration Date</label>
+      <input type="date" [(ngModel)]="produit.dateExpiration" name="dateExpiration" class="form-control">
     </div>
-    <div class="mb-3">
-      <label for="stock" class="form-label">Stock</label>
-      <input
-        type="number"
-        class="form-control"
-        id="stock"
-        name="stock"
-        [(ngModel)]="produit.stock"
-        min="0"
-      />
+
+    <div class="form-group">
+      <label>Stock</label>
+      <input type="number" [(ngModel)]="produit.stock" name="stock" class="form-control">
     </div>
-    <div class="mb-3">
-      <label for="seuilMin" class="form-label">Seuil Minimum</label>
-      <input
-        type="number"
-        class="form-control"
-        id="seuilMin"
-        name="seuilMin"
-        [(ngModel)]="produit.seuilMin"
-        min="0"
-      />
+
+    <div class="form-group">
+      <label>Minimum Stock Threshold</label>
+      <input type="number" [(ngModel)]="produit.seuilMin" name="seuilMin" class="form-control">
     </div>
-    <div class="mb-3">
-      <label for="fournisseur" class="form-label">Fournisseur</label>
-      <input
-        type="text"
-        class="form-control"
-        id="fournisseur"
-        name="fournisseur"
-        [(ngModel)]="produit.fournisseur"
-      />
-    </div>
-    <div class="mb-3">
-      <label for="fournisseurId" class="form-label">Fournisseur ID</label>
-      <input
-        type="number"
-        class="form-control"
-        id="fournisseurId"
-        name="fournisseurId"
-        [(ngModel)]="produit.fournisseurId"
-      />
-    </div>
-    <div class="mb-3">
-      <label for="category" class="form-label">Catégorie</label>
-      <select
-        class="form-control"
-        id="category"
-        name="category"
-        [(ngModel)]="produit.category"
-        required
-        #category="ngModel"
-        [ngClass]="{'is-invalid': category.invalid && category.touched}"
-      >
-        <option value="" disabled>Sélectionner une catégorie</option>
+
+    <div class="form-group">
+      <label>Category *</label>
+      <select [(ngModel)]="produit.category" name="category" class="form-control" required>
         <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
       </select>
-      <div class="invalid-feedback" *ngIf="category.invalid && category.touched">
-        La catégorie est requise.
+    </div>
+
+    <div class="form-group form-check">
+      <input type="checkbox" [(ngModel)]="produit.autoReapprovisionnement" name="autoReapprovisionnement" class="form-check-input" id="autoReappro">
+      <label class="form-check-label" for="autoReappro">Enable Auto-Restock</label>
+    </div>
+
+    <div *ngIf="produit.autoReapprovisionnement" class="form-group">
+      <label>Restock Quantity</label>
+      <input type="number" [(ngModel)]="produit.quantiteReapprovisionnement" name="quantiteReapprovisionnement" class="form-control">
+    </div>
+
+    <div class="form-group">
+      <label>Product Image {{ isEditMode ? '' : '*' }}</label>
+      <input type="file" (change)="onFileChange($event)" class="form-control" accept="image/*" [required]="!isEditMode">
+      <small *ngIf="isEditMode && currentImageUrl" class="text-muted">
+        Current image: <a [href]="currentImageUrl" target="_blank">View</a>
+      </small>
+      <!-- Optionnel : Affiche un aperçu de l'image sélectionnée -->
+      <div *ngIf="selectedFile">
+        <p>Selected image: {{ selectedFile.name }}</p>
       </div>
     </div>
-    <div class="mb-3">
-      <label for="imageFile" class="form-label">Image</label>
-      <input
-        type="file"
-        class="form-control"
-        id="imageFile"
-        name="imageFile"
-        (change)="onFileChange($event)"
-        accept="image/*"
-        required
-      />
-    </div>
-    <button class="btn btn-success" type="submit" [disabled]="produitForm.invalid">
-      Créer
+
+    <button type="submit" class="btn btn-primary w-100 mt-3">
+      {{ isEditMode ? 'Update Product' : 'Create Product' }}
+    </button>
+    <button type="button" class="btn btn-secondary w-100 mt-2" (click)="cancel()">
+      Cancel
     </button>
   </form>
 </div>

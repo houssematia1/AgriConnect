@@ -8,9 +8,12 @@ export interface Produit {
   dateExpiration?: string;
   fournisseur?: string;
   fournisseurId?: number;
-  image?: string; // Includes 'image'
-  stock?: number;
+  image?: string;
+  stock: number;
   seuilMin?: number;
   autoReapprovisionnement?: boolean;
   quantiteReapprovisionnement?: number;
+  category?: string;
+  available: boolean;
+
 }

@@ -45,4 +45,15 @@ export class UserService {
   searchUsers(query: string): Observable<User[]> {
     return this.http.get<User[]>(`${this.apiUrl}/search?query=${encodeURIComponent(query)}`);
   }
+  getUserRole(): string {
+    // Exemple : tu récupères le rôle à partir du localStorage (ou selon ta logique)
+    return localStorage.getItem('userRole') || '';
+  }
+  
+  
+  getCurrentUser(): any {
+    const user = localStorage.getItem('user');
+    return user ? JSON.parse(user) : null;
+  }
+  
 }

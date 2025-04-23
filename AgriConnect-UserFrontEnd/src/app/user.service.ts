@@ -17,6 +17,9 @@ export interface User {
   providedIn: 'root'
 })
 export class UserService {
+  getUserRole(): string {
+    throw new Error('Method not implemented.');
+  }
   private apiUrl = 'http://localhost:8082/api/users';
   private authUrl = 'http://localhost:8082/api/auth';
 

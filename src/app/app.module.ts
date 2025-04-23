@@ -13,7 +13,13 @@ import { UserEditComponent } from './user-edit/user-edit.component';
 import { ProduitCreateComponent } from './produit-create/produit-create.component';
 import { ProductListComponent } from './product-list/product-list.component';
 import { CommonModule } from '@angular/common';
-
+import { HomeclientComponent } from './homeclient/homeclient.component';
+import { ProduitDetailsComponent } from './produit-details/produit-details.component';
+import { ProduitParCategorieComponent } from './produit-par-categorie/produit-par-categorie.component';
+import { NotificationComponent } from './notification/notification.component';
+import { ProductListClientComponent } from './product-list-client/product-list-client.component';
+import { ProduitParCategorieClientComponent } from './produit-par-categorie-client/produit-par-categorie-client.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
   declarations: [
@@ -25,13 +31,14 @@ import { CommonModule } from '@angular/common';
     UserEditComponent,
     ProduitCreateComponent,
     ProductListComponent,
-    
-  
+    HomeclientComponent,
+    ProduitDetailsComponent,
+    ProduitParCategorieComponent,
+    NotificationComponent,
+    ProductListClientComponent,
+    ProduitParCategorieClientComponent,
    
-    
-  
-
-    
+   
   ],
   imports: [
     BrowserModule,
@@ -40,7 +47,10 @@ import { CommonModule } from '@angular/common';
     HttpClientModule,
     AppRoutingModule,
     RouterModule,
-    CommonModule
+    CommonModule,
+    BrowserAnimationsModule,
+    
+    
   ],
   providers: [],
   bootstrap: [AppComponent]

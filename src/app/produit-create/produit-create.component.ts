@@ -1,81 +1,119 @@
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
 import { ProduitService } from '../services/produit.service';
+import { Produit } from '../models/produit.model';
 
 @Component({
   selector: 'app-produit-create',
   templateUrl: './produit-create.component.html',
   styleUrls: ['./produit-create.component.css']
 })
-export class ProduitCreateComponent {
-  produit = {
+export class ProduitCreateComponent implements OnInit {
+  produit: Produit = {
     nom: '',
     description: '',
     prix: 0,
-    devise: 'XAF',
+    devise: 'DNT',
     taxe: 0,
     dateExpiration: '',
     stock: 0,
     seuilMin: 0,
     fournisseur: '',
-    fournisseurId: null as number | null,
+    fournisseurId: undefined,
     autoReapprovisionnement: false,
     quantiteReapprovisionnement: 0,
     category: '',
-    imageUrl: ''
+    image: '',
+    available: true
   };
 
   categories = ['FRUITS', 'LEGUMES', 'CEREALES', 'AUTRE'];
   selectedFile: File | null = null;
+  isEditMode = false;
+  productId: number | null = null;
+  currentImageUrl: string | null = null;
 
   constructor(
     private produitService: ProduitService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
-  onFileChange(event: any) {
-    this.selectedFile = event.target.files[0];
+  ngOnInit(): void {
+    this.productId = this.route.snapshot.params['id'];
+    if (this.productId) {
+      this.isEditMode = true;
+      this.loadProduct(this.productId);
+    }
   }
 
-  onSubmit() {
-    if (!this.produit.nom || !this.produit.prix || !this.produit.category) {
-      alert('Veuillez remplir tous les champs obligatoires.');
-      return;
-    }
-    if (!this.selectedFile) {
-      alert('Veuillez sélectionner une image.');
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('nom', this.produit.nom);
-    formData.append('description', this.produit.description || '');
-    formData.append('prix', this.produit.prix.toString());
-    formData.append('devise', this.produit.devise || 'XAF');
-    formData.append('taxe', this.produit.taxe.toString());
-    formData.append('category', this.produit.category);
-    formData.append('stock', this.produit.stock.toString());
-    if (this.produit.dateExpiration) {
-      formData.append('dateExpiration', this.produit.dateExpiration);
-    }
-    formData.append('seuilMin', this.produit.seuilMin.toString());
-    formData.append('fournisseur', this.produit.fournisseur || '');
-    if (this.produit.fournisseurId) {
-      formData.append('fournisseurId', this.produit.fournisseurId.toString());
-    }
-    formData.append('autoReapprovisionnement', this.produit.autoReapprovisionnement.toString());
-    formData.append('quantiteReapprovisionnement', this.produit.quantiteReapprovisionnement.toString());
-    formData.append('imageFile', this.selectedFile);
-
-    this.produitService.createWithImage(formData).subscribe({
-      next: () => {
-        alert('✅ Produit créé avec succès !');
-        this.router.navigate(['/']);
+  loadProduct(id: number): void {
+    this.produitService.getById(id).subscribe({
+      next: (produit) => {
+        this.produit = produit;
+        if (produit.image) {
+          this.currentImageUrl = produit.image; // L'URL est directement dans produit.image
+        }
       },
       error: (err) => {
-        console.error('Erreur lors de la création :', err);
-        alert('❌ Erreur: ' + (err.error?.message || err.message));
+        console.error('Error loading product:', err);
       }
     });
+  }
+
+  onFileChange(event: any): void {
+    this.selectedFile = event.target.files[0];
+    console.log('Selected file:', this.selectedFile?.name);
+  }
+
+  onSubmit(): void {
+    if (!this.produit.nom || !this.produit.prix || !this.produit.category) {
+      alert('Please fill all required fields.');
+      return;
+    }
+
+    if (!this.isEditMode && !this.selectedFile) {
+      alert('Please select an image for a new product.');
+      return;
+    }
+
+    console.log('Submitting product:', this.produit);
+    console.log('Selected file for upload:', this.selectedFile?.name);
+
+    if (this.isEditMode && this.productId) {
+      this.updateProduct(this.productId);
+    } else {
+      this.createProduct();
+    }
+  }
+
+  private createProduct(): void {
+    this.produitService.createWithImage(this.produit, this.selectedFile).subscribe({
+      next: () => {
+        alert('Product created successfully!');
+        this.router.navigate(['/products']);
+      },
+      error: (err) => {
+        console.error('Error creating product:', err);
+        alert('Error: ' + (err.error?.message || err.message || 'Unknown error'));
+      }
+    });
+  }
+
+  private updateProduct(id: number): void {
+    this.produitService.updateWithImage(id, this.produit, this.selectedFile).subscribe({
+      next: () => {
+        alert('Product updated successfully!');
+        this.router.navigate(['/products']);
+      },
+      error: (err) => {
+        console.error('Error updating product:', err);
+        alert('Error: ' + (err.error?.message || err.message || 'Unknown error'));
+      }
+    });
+  }
+
+  cancel(): void {
+    this.router.navigate(['/products']);
   }
 }
