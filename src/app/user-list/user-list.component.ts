@@ -43,6 +43,8 @@ export class UserListComponent implements OnInit {
   searchTerm: string = '';
   selectedRole: string = 'all';
   totalUsers: number = 0;
+  isLoading: boolean = false;
+  successMessage: string | null = null;
 
   page: number = 1;
   pageSize: number = 10;
@@ -93,45 +95,59 @@ export class UserListComponent implements OnInit {
   }
 
   loadUsers(): void {
-    this.userService.getUsers().subscribe(users => {
-      this.allUsers = users.map(user => {
-        const baseUser = user as User;
-        const extendedUser: ExtendedUser = {
-          id: baseUser.id,
-          nom: baseUser.nom,
-          prenom: baseUser.prenom,
-          email: baseUser.email,
-          role: baseUser.role,
-          isBlocked: baseUser.isBlocked || false,
-          photo: baseUser.photo,
-          risk_score: undefined
-        };
-        return extendedUser;
-      });
+    this.isLoading = true;
+    this.users = [];
+    this.allUsers = [];
+    this.cdr.detectChanges();
 
-      this.users = [...this.allUsers];
-      this.totalUsers = users.length;
-
-      this.allUsers.forEach(user => {
-        this.userService.getRiskScore(user.id).subscribe({
-          next: res => {
-            const index = this.allUsers.findIndex(u => u.id === user.id);
-            if (index !== -1) {
-              this.allUsers[index].risk_score = res.risk_score;
-              this.filterUsers();
-            }
-          },
-          error: () => {
-            const index = this.allUsers.findIndex(u => u.id === user.id);
-            if (index !== -1) {
-              this.allUsers[index].risk_score = undefined;
-              this.filterUsers();
-            }
-          }
+    this.userService.getUsers().subscribe({
+      next: (users) => {
+        this.allUsers = users.map(user => {
+          const baseUser = user as User;
+          const extendedUser: ExtendedUser = {
+            id: baseUser.id,
+            nom: baseUser.nom,
+            prenom: baseUser.prenom,
+            email: baseUser.email,
+            role: baseUser.role,
+            isBlocked: baseUser.isBlocked || false,
+            photo: baseUser.photo,
+            risk_score: undefined
+          };
+          return extendedUser;
         });
-      });
 
-      this.filterUsers();
+        this.users = [...this.allUsers];
+        this.totalUsers = users.length;
+
+        this.allUsers.forEach(user => {
+          this.userService.getRiskScore(user.id).subscribe({
+            next: (res) => {
+              const index = this.allUsers.findIndex(u => u.id === user.id);
+              if (index !== -1) {
+                this.allUsers[index].risk_score = res.risk_score;
+                this.filterUsers();
+              }
+            },
+            error: () => {
+              const index = this.allUsers.findIndex(u => u.id === user.id);
+              if (index !== -1) {
+                this.allUsers[index].risk_score = undefined;
+                this.filterUsers();
+              }
+            }
+          });
+        });
+
+        this.filterUsers();
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des utilisateurs:', error);
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -213,11 +229,22 @@ export class UserListComponent implements OnInit {
   }
 
   onDeleteUser(user: ExtendedUser): void {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
-      this.userService.deleteUser(user.id).subscribe(() => {
-        this.filterUsers();
+    if (confirm(`Êtes-vous sûr de vouloir supprimer ${user.nom} ${user.prenom} ?`)) {
+      this.isLoading = true;
+      this.userService.deleteUser(user.id).subscribe({
+        next: (response: any) => {
+          console.log('Réponse suppression:', response);
+          this.showSuccess('Utilisateur supprimé avec succès');
+          window.location.reload();
+        },
+        error: (error: any) => {
+          console.error('Erreur lors de la suppression:', error);
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        }
       });
     }
+
   }
 
   onAddUser(): void {
@@ -232,25 +259,46 @@ export class UserListComponent implements OnInit {
 
   onBlockUser(user: ExtendedUser): void {
     if (confirm(`Voulez-vous bloquer ${user.nom} ${user.prenom} ?`)) {
-      this.userService.blockUser(user.id, true).subscribe(() => {
-        this.filterUsers();
+      this.isLoading = true;
+      this.userService.blockUser(user.id, true).subscribe({
+        next: (response: any) => {
+          console.log('Réponse blocage:', response);
+          this.showSuccess('Utilisateur bloqué avec succès');
+          window.location.reload();
+        },
+        error: (error: any) => {
+          console.error('Erreur lors du blocage:', error);
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        }
       });
     }
   }
 
   onUnblockUser(user: ExtendedUser): void {
     if (confirm(`Voulez-vous débloquer ${user.nom} ${user.prenom} ?`)) {
-      this.userService.blockUser(user.id, false).subscribe(() => {
-        this.filterUsers();
+      this.isLoading = true;
+      this.userService.blockUser(user.id, false).subscribe({
+        next: (response: any) => {
+          console.log('Réponse déblocage:', response);
+          this.showSuccess('Utilisateur débloqué avec succès');
+          window.location.reload();
+        },
+        error: (error: any) => {
+          console.error('Erreur lors du déblocage:', error);
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        }
       });
     }
   }
 
-  getUserPhotoUrl(user: ExtendedUser): string {
-    if (!user.photo) {
-        return 'assets/images/avatar.png';
+  getUserPhotoUrl(user: User): string {
+    if (user.photo) {
+      return `http://localhost:8082/api/users/photo/${user.photo}`;
     }
-    return `http://localhost:8082/api/users/photo/${user.photo}`;
+    // Générer un avatar basé sur le nom et prénom de l'utilisateur
+    return `https://ui-avatars.com/api/?name=${user.nom}+${user.prenom}&background=0D8ABC&color=fff`;
   }
 
   toggleSidebar(): void {
@@ -262,5 +310,12 @@ export class UserListComponent implements OnInit {
     if (img) {
       img.src = 'assets/images/avatar.png';
     }
+  }
+
+  showSuccess(message: string): void {
+    this.successMessage = message;
+    setTimeout(() => {
+      this.successMessage = null;
+    }, 3000);
   }
 }

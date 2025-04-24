@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserService, User } from '../user.service';
 
@@ -8,6 +8,8 @@ import { UserService, User } from '../user.service';
   styleUrls: ['./user-edit.component.css']
 })
 export class UserEditComponent implements OnInit {
+  @ViewChild('fileInput') fileInput!: ElementRef;
+
   user: User = {
     id: 0,
     nom: '',
@@ -15,7 +17,9 @@ export class UserEditComponent implements OnInit {
     email: '',
     numeroDeTelephone: '',
     role: '',
-    isBlocked: false
+    isBlocked: false,
+    photo: '',
+    motDePasse: ''
   };
 
   message: string = '';
@@ -38,6 +42,50 @@ export class UserEditComponent implements OnInit {
     });
   }
 
+  getUserPhotoUrl(user: User): string {
+    if (user.photo) {
+      return `http://localhost:8082/api/users/photo/${user.photo}`;
+    }
+    // Générer un avatar basé sur le nom et prénom de l'utilisateur
+    return `https://ui-avatars.com/api/?name=${user.nom}+${user.prenom}&background=0D8ABC&color=fff`;
+  }
+
+  onPhotoClick(): void {
+    this.fileInput.nativeElement.click();
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      const formData = new FormData();
+      formData.append('photo', file);
+
+      this.userService.uploadPhoto(this.userId, formData).subscribe({
+        next: (filename) => {
+          this.user.photo = filename;
+          this.message = '✅ Photo mise à jour avec succès';
+          setTimeout(() => {
+            this.message = '';
+          }, 3000);
+        },
+        error: () => {
+          this.message = '❌ Erreur lors du téléchargement de la photo';
+          setTimeout(() => {
+            this.message = '';
+          }, 3000);
+        }
+      });
+    }
+  }
+
+  handleImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    if (img) {
+      img.src = this.getUserPhotoUrl(this.user);
+    }
+  }
+
   onSubmit(): void {
     // ✅ Supprimer manuellement motDePasse du payload
     const payload: any = { ...this.user };
@@ -45,7 +93,10 @@ export class UserEditComponent implements OnInit {
 
     this.userService.updateUser(payload).subscribe({
       next: () => {
-        this.router.navigate(['/users']);
+        this.message = '✅ Utilisateur mis à jour avec succès';
+        setTimeout(() => {
+          this.router.navigate(['/users']);
+        }, 1500);
       },
       error: () => {
         this.message = '❌ Erreur lors de la mise à jour';

@@ -47,6 +47,11 @@
           <button class="btn-primary" (click)="onAddUser()">+ Ajouter</button>
           <button class="btn logout" (click)="onLogout()">⎋ Déconnexion</button>
 
+          <!-- Notification de succès -->
+          <div *ngIf="successMessage" class="success-notification">
+            {{ successMessage }}
+          </div>
+
           <!-- Profile container -->
           <div class="profile-container" (click)="toggleProfileMenu()">
             <img
@@ -128,6 +133,10 @@
 
       <!-- Tableau utilisateurs -->
       <div class="table-container">
+        <div *ngIf="isLoading" class="loading-overlay">
+          <div class="loading-spinner"></div>
+          <p>Chargement en cours...</p>
+        </div>
         <table class="styled-table">
           <thead>
             <tr>
@@ -145,9 +154,9 @@
               <td>{{ i + 1 }}</td>
               <td class="user-cell">
                 <img class="avatar"
-                     [src]="user.photo ? 'http://localhost:8082/uploads/' + user.photo : 'https://ui-avatars.com/api/?name=' + user.nom + '+' + user.prenom + '&background=0D8ABC&color=fff'"
+                     [src]="getUserPhotoUrl(user)"
                      alt="avatar"
-                     onerror="this.src='https://ui-avatars.com/api/?name=User&background=0D8ABC&color=fff'" />
+                     (error)="handleImageError($event)" />
                 <div>
                   <div class="name">{{ user.nom }} {{ user.prenom }}</div>
                 </div>
