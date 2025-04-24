@@ -3,6 +3,8 @@
 <head>
   <!-- Inclure Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Inclure Font Awesome pour les icônes -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
     /* Animation de chargement */
     .spinner {
@@ -62,13 +64,18 @@
     <!-- Liste des promotions -->
     <div *ngIf="promotionsAutomatiques.length > 0; else noPromotions" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
       <div *ngFor="let promo of promotionsAutomatiques" class="promotion-card bg-white shadow-lg rounded-lg p-6 border border-gray-200">
-        <h3 class="text-xl font-semibold text-blue-600 mb-3">{{ promo.nom }}</h3>
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-xl font-semibold text-blue-600">{{ promo.nom }}</h3>
+          <span *ngIf="promo.isAISuggested" class="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded">
+            <i class="fas fa-robot mr-1"></i> Suggéré par IA
+          </span>
+        </div>
         <div class="space-y-2">
-          <p class="text-gray-700">
+          <p *ngIf="!promo.waitingForDetection" class="text-gray-700">
             <span class="font-medium">Réduction :</span> {{ promo.pourcentageReduction }}%
           </p>
           <p class="text-gray-700">
-            <span class="font-medium">Condition :</span> {{ promo.conditionPromotion || 'Aucune' }}
+            <span class="font-medium">Condition :</span> {{ formatCondition(promo.conditionPromotion) }}
           </p>
           <p class="text-gray-700">
             <span class="font-medium">Du :</span> {{ formatDate(promo.dateDebut) }}
@@ -85,7 +92,7 @@
             </span>
           </p>
           <ng-template #scheduled>
-            <p *ngIf="promo.dateActivationPrevue; else inactive" class="text-yellow-600 font-medium">
+            <p *ngIf="promo.dateActivationPrevue && !promo.waitingForDetection; else waitingOrInactive" class="text-yellow-600 font-medium">
               <span class="inline-flex items-center">
                 <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -93,8 +100,16 @@
                 Statut : Prévue pour le {{ formatDate(promo.dateActivationPrevue) }}
               </span>
             </p>
-            <ng-template #inactive>
-              <p class="text-red-600 font-medium">
+            <ng-template #waitingOrInactive>
+              <p *ngIf="promo.waitingForDetection" class="text-gray-600 font-medium">
+                <span class="inline-flex items-center">
+                  <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  Statut : En attente de détection de produits
+                </span>
+              </p>
+              <p *ngIf="!promo.waitingForDetection" class="text-red-600 font-medium">
                 <span class="inline-flex items-center">
                   <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -126,6 +141,10 @@
             </div>
           </div>
         </div>
+        <!-- Message si en attente de détection -->
+        <div *ngIf="promo.waitingForDetection" class="mt-4 text-gray-500 italic">
+          Aucun produit détecté pour le moment. Une promotion sera générée automatiquement lorsqu'un produit répondra aux critères (faibles ventes et expiration proche).
+        </div>
       </div>
     </div>
 
@@ -138,7 +157,12 @@
 
     <!-- Highlight pour la promotion d'expiration active -->
     <div *ngIf="promotionExpirationActive" class="highlight mt-8 bg-blue-50 border-l-4 border-blue-500 p-6 rounded-r-lg">
-      <h3 class="text-xl font-semibold text-blue-700 mb-2">Promotion d'expiration active : {{ promotionExpirationActive.nom }}</h3>
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="text-xl font-semibold text-blue-700">Promotion d'expiration active : {{ promotionExpirationActive.nom }}</h3>
+        <span *ngIf="promotionExpirationActive.isAISuggested" class="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded">
+          <i class="fas fa-robot mr-1"></i> Suggéré par IA
+        </span>
+      </div>
       <p class="text-blue-600">Réduction : {{ promotionExpirationActive.pourcentageReduction }}%</p>
       <p class="text-blue-600">Valide jusqu'au : {{ formatDate(promotionExpirationActive.dateFin) }}</p>
     </div>

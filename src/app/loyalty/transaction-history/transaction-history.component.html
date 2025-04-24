@@ -1,0 +1,87 @@
+<div class="transaction-history-section">
+  <h2>Historique des Transactions</h2>
+
+  <!-- User Info -->
+  <div *ngIf="isLoadingUser" class="loading">
+    Chargement de l'utilisateur...
+  </div>
+  <div *ngIf="!isLoadingUser && user" class="user-info">
+    <h3>Utilisateur : {{ user.nom }} {{ user.prenom }} (ID: {{ user.id }})</h3>
+    <p>Email : {{ user.email }}</p>
+  </div>
+  <div *ngIf="!isLoadingUser && !user" class="error-message">
+    Utilisateur non trouvé.
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+    <button class="retry-btn" (click)="retryLoad()">Réessayer</button>
+  </div>
+
+  <!-- Filter -->
+  <div class="filter-section">
+    <label for="filter">Filtrer les transactions :</label>
+    <input
+      type="text"
+      id="filter"
+      [(ngModel)]="filterText"
+      (input)="filterTransactions()"
+      placeholder="Rechercher par description ou points..."
+    />
+    <button class="clear-filter-btn" (click)="clearFilter()" *ngIf="filterText">Effacer</button>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="isLoadingTransactions" class="loading">
+    Chargement des transactions...
+  </div>
+
+  <!-- Transactions Table -->
+  <div *ngIf="!isLoadingTransactions" class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th (click)="sortTable('id')">
+            ID
+            <i *ngIf="sortColumn === 'id'" [class]="sortDirection === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'"></i>
+          </th>
+          <th (click)="sortTable('points')">
+            Points
+            <i *ngIf="sortColumn === 'points'" [class]="sortDirection === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'"></i>
+          </th>
+          <th (click)="sortTable('description')">
+            Description
+            <i *ngIf="sortColumn === 'description'" [class]="sortDirection === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'"></i>
+          </th>
+          <th (click)="sortTable('transactionDate')">
+            Date
+            <i *ngIf="sortColumn === 'transactionDate'" [class]="sortDirection === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'"></i>
+          </th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let transaction of filteredTransactions">
+          <td>{{ transaction.id }}</td>
+          <td>{{ transaction.points }}</td>
+          <td>{{ transaction.description }}</td>
+          <td>{{ transaction.transactionDate | date:'dd MMM yyyy, HH:mm' }}</td>
+          <td class="actions-cell">
+            <button class="action-btn delete-btn" (click)="deleteTransaction(transaction.id!)">
+              <i class="fas fa-trash"></i> Supprimer
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="filteredTransactions.length === 0">
+          <td colspan="5" class="no-data">Aucune transaction trouvée.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Back Button -->
+  <div class="actions">
+    <button class="back-btn" (click)="goBack()">Retour</button>
+  </div>
+</div>

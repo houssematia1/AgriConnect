@@ -1,0 +1,81 @@
+<div class="fidelities-list-section">
+  <h2>Liste des Fidélités</h2>
+
+  <!-- Add Fidelity Button with click -->
+  <div class="actions mb-4">
+    <button class="add-btn" (click)="addFidelity()">Ajouter une Fidélité</button>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+    <button class="retry-btn" (click)="retryLoad()">Réessayer</button>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="isLoadingFidelites || isLoadingUsers" class="loading">
+    Chargement...
+  </div>
+
+  <!-- Fidelities Table -->
+  <table *ngIf="!isLoadingFidelites && !isLoadingUsers" class="fidelities-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>UTILISATEUR</th>
+        <th>EMAIL</th>
+        <th>RÔLE</th>
+        <th>DATE DE NAISSANCE</th>
+        <th>POINTS</th>
+        <th>NIVEAU</th>
+        <th>DERNIÈRE MISE À JOUR</th>
+        <th>ACTIONS</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let fidelite of fidelites">
+        <td>{{ fidelite.id }}</td>
+        <td>
+          <ng-container *ngIf="fidelite.user?.id as userId">
+            {{ getUserById(userId)?.nom }} {{ getUserById(userId)?.prenom }}
+          </ng-container>
+          <ng-container *ngIf="!fidelite.user?.id">
+            Utilisateur non défini
+          </ng-container>
+        </td>
+        <td>
+          <ng-container *ngIf="fidelite.user?.id as userId">
+            {{ getUserById(userId)?.email }}
+          </ng-container>
+          <ng-container *ngIf="!fidelite.user?.id">
+            Utilisateur non défini
+          </ng-container>
+        </td>
+        <td>
+          <ng-container *ngIf="fidelite.user?.id as userId">
+            {{ getUserById(userId)?.role }}
+          </ng-container>
+          <ng-container *ngIf="!fidelite.user?.id">
+            Utilisateur non défini
+          </ng-container>
+        </td>
+        <td>
+          <ng-container *ngIf="fidelite.user?.id as userId">
+            {{ getUserById(userId)?.dateOfBirth | date: 'dd/MM/yyyy' }}
+          </ng-container>
+          <ng-container *ngIf="!fidelite.user?.id">
+            Utilisateur non défini
+          </ng-container>
+        </td>
+        <td>{{ fidelite.points }}</td>
+        <td>{{ fidelite.niveau }}</td>
+        <td>{{ fidelite.lastUpdated | date: 'dd/MM/yyyy HH:mm' }}</td>
+        <td>
+          <button class="edit-btn" (click)="editFidelity(fidelite.id!)">Modifier</button>
+          <button class="delete-btn" (click)="deleteFidelity(fidelite.id!)">Supprimer</button>
+          <button class="history-btn" (click)="viewHistory(fidelite.user?.id)">Historique</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

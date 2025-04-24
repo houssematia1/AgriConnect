@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Observable, interval, Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
@@ -24,6 +24,36 @@ interface Produit {
   autoReapprovisionnement?: boolean;
   quantiteReapprovisionnement?: number;
   salesCount?: number;
+}
+
+// Interface for Page (for paginated responses)
+interface Page<T> {
+  content: T[];
+  pageable: {
+    sort: {
+      sorted: boolean;
+      unsorted: boolean;
+      empty: boolean;
+    };
+    pageSize: number;
+    pageNumber: number;
+    offset: number;
+    paged: boolean;
+    unpaged: boolean;
+  };
+  totalPages: number;
+  totalElements: number;
+  last: boolean;
+  size: number;
+  number: number;
+  sort: {
+    sorted: boolean;
+    unsorted: boolean;
+    empty: boolean;
+  };
+  numberOfElements: number;
+  first: boolean;
+  empty: boolean;
 }
 
 // Interface for Promotion
@@ -53,6 +83,7 @@ export class PromotionListComponent implements OnInit, OnDestroy {
   successMessage: string | null = null;
   errorMessage: string | null = null;
   isLoading = false;
+  isLoadingProducts = false;
 
   searchTerm = '';
   filterCondition = '';
@@ -66,17 +97,24 @@ export class PromotionListComponent implements OnInit, OnDestroy {
   pageSize = 10;
   totalPages = 1;
 
+  // Properties for managing products in the modal
+  availableProducts: Produit[] = [];
+  selectedProductIdToAdd: string | null = null;
+
   private pollingSubscription: Subscription | null = null;
   private apiUrl = 'http://localhost:8082/promotions';
+  private productsApiUrl = 'http://localhost:8082/api/produits';
 
   constructor(
     private http: HttpClient,
     private dialog: MatDialog,
-    private promotionUpdateService: PromotionUpdateService
+    private promotionUpdateService: PromotionUpdateService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     this.loadPromotions();
+    this.loadAvailableProducts();
     this.pollingSubscription = interval(30000).subscribe(() => {
       this.loadPromotions();
     });
@@ -88,38 +126,72 @@ export class PromotionListComponent implements OnInit, OnDestroy {
     }
   }
 
+  loadAvailableProducts(): void {
+    this.isLoadingProducts = true;
+    const params = {
+      page: '0',
+      pageSize: '100',
+      sortBy: 'id'
+    };
+    this.http.get<Page<Produit>>(this.productsApiUrl, { params }).pipe(
+      finalize(() => this.isLoadingProducts = false)
+    ).subscribe(
+      (page) => {
+        console.log('Raw page data from backend:', page);
+        this.availableProducts = page.content.map(prod => {
+          const mappedProd = {
+            ...prod,
+            prix: Number(prod.prix),
+            devise: prod.devise || 'TND'
+          };
+          console.log(`Mapped product ${prod.nom}:`, mappedProd);
+          return mappedProd;
+        });
+        console.log('All mapped products:', this.availableProducts);
+      },
+      (error: HttpErrorResponse) => {
+        console.error('Error loading products:', error);
+        this.errorMessage = `Échec du chargement des produits: ${error.message}. Vérifiez que le serveur backend est en cours d'exécution.`;
+        this.clearMessages();
+      }
+    );
+  }
+
   loadPromotions(): void {
     this.isLoading = true;
     this.getPromotions().pipe(
       finalize(() => this.isLoading = false)
     ).subscribe(
       data => {
-        this.promotions = data.map(promo => ({
-          ...promo,
-          id: Number(promo.id),
-          dateDebut: new Date(promo.dateDebut),
-          dateFin: new Date(promo.dateFin),
-          // Mapping des produits associés à chaque promotion
-          produits: promo.produits?.map((prod: any) => ({
-            ...prod,
-            prix: Number(prod.prix),
-            devise: prod.devise || 'TND', // Définit une devise par défaut
-            // Vous pouvez ajouter d'autres transformations ou calculs nécessaires ici
-          }))
-        }));
+        console.log('Raw promotions data from backend (loadPromotions):', data);
+        this.promotions = data.map(promo => {
+          const storedProduits = localStorage.getItem(`promotion_produits_${promo.id}`);
+          const produits = storedProduits ? JSON.parse(storedProduits) : (promo.produits || []);
+          const mappedPromo = {
+            ...promo,
+            id: Number(promo.id),
+            dateDebut: new Date(promo.dateDebut),
+            dateFin: new Date(promo.dateFin),
+            produits: produits.map((prod: any) => ({
+              ...prod,
+              prix: Number(prod.prix),
+              devise: prod.devise || 'TND'
+            }))
+          };
+          console.log(`Mapped promotion ${promo.nom}:`, mappedPromo);
+          return mappedPromo;
+        });
+        console.log('All mapped promotions:', this.promotions);
         this.showingActiveOnly = false;
         this.applyFilters();
       },
       (error: HttpErrorResponse) => {
         console.error('Error loading promotions:', error);
-        console.log('Error status:', error.status);
-        console.log('Error response:', error.error);
         this.errorMessage = `Échec du chargement des promotions: ${error.message}. Vérifiez que le serveur backend est en cours d'exécution et que l'API renvoie un JSON valide.`;
         this.clearMessages();
       }
     );
   }
-  
 
   private showSuccess(message: string): void {
     this.successMessage = message;
@@ -138,21 +210,25 @@ export class PromotionListComponent implements OnInit, OnDestroy {
 
   getActivePromotions(): void {
     this.isLoading = true;
-    this.http.get<Promotion[]>(`${this.apiUrl}/actives`).pipe(
+    this.http.get<Promotion[]>(`${this.apiUrl}/actives`, { withCredentials: true }).pipe(
       finalize(() => this.isLoading = false)
     ).subscribe(
       data => {
-        this.promotions = data.map(promo => ({
-          ...promo,
-          id: Number(promo.id),
-          dateDebut: new Date(promo.dateDebut),
-          dateFin: new Date(promo.dateFin),
-          produits: promo.produits?.map((prod: any) => ({
-            ...prod,
-            prix: Number(prod.prix),
-            devise: prod.devise || 'TND'
-          }))
-        }));
+        this.promotions = data.map(promo => {
+          const storedProduits = localStorage.getItem(`promotion_produits_${promo.id}`);
+          const produits = storedProduits ? JSON.parse(storedProduits) : (promo.produits || []);
+          return {
+            ...promo,
+            id: Number(promo.id),
+            dateDebut: new Date(promo.dateDebut),
+            dateFin: new Date(promo.dateFin),
+            produits: produits.map((prod: any) => ({
+              ...prod,
+              prix: Number(prod.prix),
+              devise: prod.devise || 'TND'
+            }))
+          };
+        });
         this.showingActiveOnly = true;
         this.applyFilters();
       },
@@ -165,14 +241,79 @@ export class PromotionListComponent implements OnInit, OnDestroy {
   }
 
   editPromotion(promotion: Promotion): void {
-    this.editMode = true;
-    this.selectedPromotion = { ...promotion, id: Number(promotion.id) };
+    const existingPromotion = this.promotions.find(p => p.id === promotion.id);
+    if (existingPromotion && existingPromotion.produits?.length) {
+      this.editMode = true;
+      this.selectedPromotion = { ...existingPromotion };
+      console.log('Using local promotion data for edit:', this.selectedPromotion);
+      this.selectedProductIdToAdd = null;
+      return;
+    }
+
+    this.isLoading = true;
+    this.http.get<Promotion>(`${this.apiUrl}/${promotion.id}`, { withCredentials: true }).pipe(
+      finalize(() => this.isLoading = false)
+    ).subscribe(
+      data => {
+        console.log('Raw promotion data from backend (editPromotion):', data);
+        const storedProduits = localStorage.getItem(`promotion_produits_${data.id}`);
+        const produits = storedProduits ? JSON.parse(storedProduits) : (data.produits || []);
+        this.editMode = true;
+        this.selectedPromotion = {
+          ...data,
+          id: Number(data.id),
+          dateDebut: new Date(data.dateDebut),
+          dateFin: new Date(data.dateFin),
+          produits: produits.map((prod: any) => ({
+            ...prod,
+            prix: Number(prod.prix),
+            devise: prod.devise || 'TND'
+          }))
+        };
+        console.log('Fetched promotion for edit:', this.selectedPromotion);
+        this.selectedProductIdToAdd = null;
+      },
+      error => {
+        console.error('Error fetching promotion:', error);
+        this.errorMessage = `Échec du chargement des détails de la promotion: ${error.message}`;
+        this.clearMessages();
+      }
+    );
+  }
+
+  addProductToPromotion(): void {
+    if (!this.selectedProductIdToAdd || !this.selectedPromotion) return;
+
+    const productId = Number(this.selectedProductIdToAdd);
+    const productToAdd = this.availableProducts.find(product => product.id === productId);
+
+    if (productToAdd) {
+      if (!this.selectedPromotion.produits?.find(p => p.id === productId)) {
+        if (!this.selectedPromotion.produits) {
+          this.selectedPromotion.produits = [];
+        }
+        this.selectedPromotion.produits.push(productToAdd);
+        this.cdr.detectChanges();
+      } else {
+        this.errorMessage = 'Ce produit est déjà associé à la promotion.';
+        this.clearMessages();
+      }
+    }
+    this.selectedProductIdToAdd = null;
+  }
+
+  removeProductFromPromotion(index: number): void {
+    if (this.selectedPromotion && this.selectedPromotion.produits) {
+      this.selectedPromotion.produits.splice(index, 1);
+      this.cdr.detectChanges();
+    }
   }
 
   updatePromotion(): void {
     if (!this.selectedPromotion || !this.validatePromotion(this.selectedPromotion)) return;
     this.isLoading = true;
     const id = this.selectedPromotion.id;
+    const localProduits = this.selectedPromotion.produits || [];
     const payload = {
       id: this.selectedPromotion.id,
       nom: this.selectedPromotion.nom,
@@ -184,22 +325,26 @@ export class PromotionListComponent implements OnInit, OnDestroy {
       produits: this.selectedPromotion.produits
     };
     const headers = new HttpHeaders().set('Content-Type', 'application/json');
-    this.http.put<Promotion>(`${this.apiUrl}/${id}`, payload, { headers }).pipe(
+    this.http.put<Promotion>(`${this.apiUrl}/${id}`, payload, { headers, withCredentials: true }).pipe(
       finalize(() => this.isLoading = false)
     ).subscribe(
       updatedPromotion => {
+        console.log('Backend response after update:', updatedPromotion);
         updatedPromotion.id = Number(updatedPromotion.id);
         updatedPromotion.dateDebut = new Date(updatedPromotion.dateDebut);
         updatedPromotion.dateFin = new Date(updatedPromotion.dateFin);
-        updatedPromotion.produits = updatedPromotion.produits?.map((prod: any) => ({
-          ...prod,
-          prix: Number(prod.prix),
-          devise: prod.devise || 'TND'
-        }));
+        updatedPromotion.produits = updatedPromotion.produits?.length
+          ? updatedPromotion.produits.map((prod: any) => ({
+              ...prod,
+              prix: Number(prod.prix),
+              devise: prod.devise || 'TND'
+            }))
+          : localProduits;
         const index = this.promotions.findIndex(p => p.id === updatedPromotion.id);
         if (index !== -1) {
           this.promotions[index] = updatedPromotion;
         }
+        localStorage.setItem(`promotion_produits_${id}`, JSON.stringify(updatedPromotion.produits));
         this.cancelEdit();
         this.applyFilters();
         this.showSuccess('Promotion mise à jour avec succès !');
@@ -225,11 +370,12 @@ export class PromotionListComponent implements OnInit, OnDestroy {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.isLoading = true;
-        this.http.delete(`${this.apiUrl}/${id}`).pipe(
+        this.http.delete(`${this.apiUrl}/${id}`, { withCredentials: true }).pipe(
           finalize(() => this.isLoading = false)
         ).subscribe(
           () => {
             this.promotions = this.promotions.filter(p => p.id !== id);
+            localStorage.removeItem(`promotion_produits_${id}`);
             this.applyFilters();
             this.showSuccess('Promotion supprimée avec succès !');
             this.promotionUpdateService.notifyUpdates();
@@ -253,16 +399,10 @@ export class PromotionListComponent implements OnInit, OnDestroy {
     const headers = new HttpHeaders()
       .set('Content-Type', 'application/json')
       .set('Accept', 'application/json');
-    console.log('Sending request to:', `${this.apiUrl}/${promotion.id}/toggle-active`);
-    console.log('Headers:', headers);
-    console.log('Payload:', JSON.stringify(payload));
-    console.log('Request method: PUT');
-    this.http.put<Promotion>(`${this.apiUrl}/${promotion.id}/toggle-active`, payload, { headers }).pipe(
+    this.http.put<Promotion>(`${this.apiUrl}/${promotion.id}/toggle-active`, payload, { headers, withCredentials: true }).pipe(
       finalize(() => this.isLoading = false)
     ).subscribe(
       updated => {
-        console.log('Response status:', 200); // Assuming success
-        console.log('Response body:', updated);
         updated.id = Number(updated.id);
         updated.dateDebut = new Date(updated.dateDebut);
         updated.dateFin = new Date(updated.dateFin);
@@ -280,8 +420,6 @@ export class PromotionListComponent implements OnInit, OnDestroy {
         this.promotionUpdateService.notifyUpdates();
       },
       error => {
-        console.log('Response status:', error.status);
-        console.log('Response body:', error.error);
         this.handleError(`Échec de la ${promotion.active ? 'désactivation' : 'activation'} de la promotion`, error);
       }
     );
@@ -290,6 +428,7 @@ export class PromotionListComponent implements OnInit, OnDestroy {
   cancelEdit(): void {
     this.editMode = false;
     this.selectedPromotion = null;
+    this.selectedProductIdToAdd = null;
   }
 
   clearMessages(): void {
@@ -318,6 +457,7 @@ export class PromotionListComponent implements OnInit, OnDestroy {
       filtered = filtered.filter(promotion => new Date(promotion.dateFin) <= endDate);
     }
     this.filteredPromotions = filtered;
+    console.log('Filtered promotions:', this.filteredPromotions);
     if (this.sortColumn) {
       this.sortPromotions(this.sortColumn);
     }
@@ -422,7 +562,7 @@ export class PromotionListComponent implements OnInit, OnDestroy {
     }
     this.isLoading = true;
     const headers = new HttpHeaders().set('Content-Type', 'application/json');
-    this.http.post(`${this.apiUrl}/bulk-activate`, ids, { headers }).pipe(
+    this.http.post(`${this.apiUrl}/bulk-activate`, ids, { headers, withCredentials: true }).pipe(
       finalize(() => this.isLoading = false)
     ).subscribe(
       () => {
@@ -445,7 +585,7 @@ export class PromotionListComponent implements OnInit, OnDestroy {
     }
     this.isLoading = true;
     const headers = new HttpHeaders().set('Content-Type', 'application/json');
-    this.http.post(`${this.apiUrl}/bulk-deactivate`, ids, { headers }).pipe(
+    this.http.post(`${this.apiUrl}/bulk-deactivate`, ids, { headers, withCredentials: true }).pipe(
       finalize(() => this.isLoading = false)
     ).subscribe(
       () => {
@@ -471,11 +611,12 @@ export class PromotionListComponent implements OnInit, OnDestroy {
       if (result) {
         this.isLoading = true;
         const headers = new HttpHeaders().set('Content-Type', 'application/json');
-        this.http.post(`${this.apiUrl}/bulk-delete`, ids, { headers }).pipe(
+        this.http.post(`${this.apiUrl}/bulk-delete`, ids, { headers, withCredentials: true }).pipe(
           finalize(() => this.isLoading = false)
         ).subscribe(
           () => {
             this.promotions = this.promotions.filter(p => !this.selectedPromotionIds.has(p.id));
+            ids.forEach(id => localStorage.removeItem(`promotion_produits_${id}`));
             this.applyFilters();
             this.selectedPromotionIds.clear();
             this.showSuccess(`${ids.length} promotions supprimées !`);
@@ -577,7 +718,7 @@ export class PromotionListComponent implements OnInit, OnDestroy {
     }
     this.isLoading = true;
     const headers = new HttpHeaders().set('Content-Type', 'application/json');
-    this.http.put<Promotion>(`${this.apiUrl}/${id}`, { ...this.promotions.find(p => p.id === id), active: true }, { headers }).pipe(
+    this.http.put<Promotion>(`${this.apiUrl}/${id}`, { ...this.promotions.find(p => p.id === id), active: true }, { headers, withCredentials: true }).pipe(
       finalize(() => this.isLoading = false)
     ).subscribe(
       updatedPromotion => {
@@ -617,11 +758,12 @@ export class PromotionListComponent implements OnInit, OnDestroy {
           return;
         }
         this.isLoading = true;
-        this.http.delete(`${this.apiUrl}/${id}`).pipe(
+        this.http.delete(`${this.apiUrl}/${id}`, { withCredentials: true }).pipe(
           finalize(() => this.isLoading = false)
         ).subscribe(
           () => {
             this.promotions = this.promotions.filter(p => p.id !== id);
+            localStorage.removeItem(`promotion_produits_${id}`);
             this.applyFilters();
             this.showSuccess('Suggestion IA rejetée !');
           },

@@ -1,0 +1,147 @@
+.fidelities-section {
+  margin: 20px;
+  font-family: Arial, sans-serif;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+h2 {
+  color: #333;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Error Message */
+.error-message {
+  color: red;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+/* Retry Button */
+.retry-btn {
+  margin-left: 10px;
+  padding: 5px 10px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.retry-btn:hover {
+  background-color: #218838;
+}
+
+/* Loading Spinner */
+.loading {
+  text-align: center;
+  color: #777;
+  margin: 20px 0;
+}
+
+/* Table Styles */
+.table-container {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+  min-width: 100px; /* Ensure columns have a minimum width */
+}
+
+th:nth-child(1), td:nth-child(1) { /* ID */
+  min-width: 50px;
+}
+
+th:nth-child(2), td:nth-child(2) { /* Utilisateur */
+  min-width: 150px;
+}
+
+th:nth-child(3), td:nth-child(3) { /* Email */
+  min-width: 200px;
+}
+
+th:nth-child(4), td:nth-child(4) { /* Rôle */
+  min-width: 100px;
+}
+
+th:nth-child(5), td:nth-child(5) { /* Points */
+  min-width: 80px;
+}
+
+th:nth-child(6), td:nth-child(6) { /* Niveau */
+  min-width: 80px;
+}
+
+th:nth-child(7), td:nth-child(7) { /* Dernière Mise à Jour */
+  min-width: 150px;
+}
+
+.actions-cell {
+  min-width: 250px; /* Ensure enough space for buttons */
+  white-space: nowrap; /* Prevent buttons from wrapping */
+}
+
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+tr:hover {
+  background-color: #f1f1f1;
+}
+
+.no-data {
+  text-align: center;
+  color: #777;
+  padding: 20px;
+}
+
+/* Button Styles */
+.action-btn {
+  padding: 5px 10px;
+  margin: 0 5px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.edit-btn {
+  background-color: #007bff;
+  color: white;
+}
+
+.edit-btn:hover {
+  background-color: #0056b3;
+}
+
+.delete-btn {
+  background-color: #dc3545;
+  color: white;
+}
+
+.delete-btn:hover {
+  background-color: #c82333;
+}
+
+.history-btn {
+  background-color: #17a2b8;
+  color: white;
+}
+
+.history-btn:hover {
+  background-color: #138496;
+}
