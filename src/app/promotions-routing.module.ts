@@ -6,18 +6,16 @@ import { PromotionListComponent } from './promotion-list/promotion-list.componen
 import { PromotionAnalyticsComponent } from './promotion-analytics/promotion-analytics.component';
 import { ProduitExpirationListComponent } from './produit-expiration-list/produit-expiration-list.component';
 
-
-
 const routes: Routes = [
   {
-    path: 'promotions',
+    path: '', // Chemin relatif : /promotions
+    component: PromotionMenuComponent,
     children: [
-      { path: '', component: PromotionMenuComponent }, // Menu principal
-      { path: 'add', component: PromotionAddComponent },
       { path: 'list', component: PromotionListComponent },
-      { path: 'produits-proches-expiration', component: ProduitExpirationListComponent },
+      { path: 'add', component: PromotionAddComponent },
       { path: 'analytics', component: PromotionAnalyticsComponent },
-      { path: '**', redirectTo: '' } // Redirection par défaut vers le menu
+      { path: 'produits-proches-expiration', component: ProduitExpirationListComponent },
+      { path: '', redirectTo: 'list', pathMatch: 'full' }
     ]
   }
 ];

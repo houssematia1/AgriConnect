@@ -52,6 +52,9 @@ export class PromotionMenuComponent {
 
   onNavClick(path: string): void {
     console.log('Navigating to:', path);
-    this.router.navigate([path]);
+    this.router.navigate([path]).catch(err => {
+      console.error('Navigation error:', err);
+    });
   }
+  
 }

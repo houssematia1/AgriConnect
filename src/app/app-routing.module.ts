@@ -15,7 +15,11 @@ const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'users', component: UserListComponent, canActivate: [AdminGuard] },
   { path: 'users/edit/:id', component: UserEditComponent, canActivate: [AdminGuard] },
-  { path: 'promotions', component: PromotionMenuComponent }, // Use PromotionMenuComponent as the parent
+  { 
+    path: 'promotions', 
+    loadChildren: () => import('./promotions-routing.module').then(m => m.PromotionsRoutingModule)
+  },
+  
   { path: 'loyalty', loadChildren: () => import('./loyalty/loyalty.module').then(m => m.LoyaltyModule) },
   { path: '**', redirectTo: '/promotions' } // Wildcard redirects to promotions
 ];
