@@ -30,7 +30,12 @@ export class ProduitParCategorieClientComponent implements OnInit {
       this.loadProducts();
     });
   }
-
+  addToCart(produit: Produit): void {
+    // Ici tu peux ajouter la logique pour ajouter au panier (cart service, localstorage, etc.)
+    console.log('Produit ajouté au panier :', produit);
+    alert(`Produit "${produit.nom}" ajouté au panier !`);
+  }
+  
   loadProducts(): void {
     this.errorMessage = null;
     if (this.category) {

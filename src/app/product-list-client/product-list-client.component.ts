@@ -25,6 +25,7 @@ export class ProductListClientComponent implements OnInit {
       next: (response: any) => {
         this.products = response.content || response;
         console.log('Produits chargés :', this.products);
+        this.produitService.setProducts(this.products);
       },
       error: (err) => {
         console.error('Error loading products:', err);
@@ -52,12 +53,18 @@ export class ProductListClientComponent implements OnInit {
       this.router.navigate(['/produit-create', productId]);
     }
   }
+  acheterProduit(product: any) {
+    console.log('Produit acheté:', product.nom);
+    // Ici tu peux ajouter la logique d'ajout au panier
+  }
+  
 
   deleteProduct(productId: number | undefined): void {
     if (productId && confirm('Are you sure you want to delete this product?')) {
       this.produitService.delete(productId).subscribe({
         next: () => {
           this.products = this.products.filter(product => product.id !== productId);
+          this.produitService.setProducts(this.products);
           alert('Product deleted successfully');
         },
         error: (err) => {

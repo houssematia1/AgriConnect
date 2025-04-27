@@ -14,6 +14,10 @@ import { ProduitParCategorieComponent } from './produit-par-categorie/produit-pa
 import { NotificationComponent } from './notification/notification.component';
 import { ProductListClientComponent } from './product-list-client/product-list-client.component';
 import { ProduitParCategorieClientComponent } from './produit-par-categorie-client/produit-par-categorie-client.component';
+import { ProduitDetailsClientComponent } from './produit-details-client/produit-details-client.component';
+import { StockPurchaseDashboardComponent } from './stock-purchase-dashboard/stock-purchase-dashboard.component';
+import { ProductPromotionViewComponent } from './product-promotion-view/product-promotion-view.component';
+import { RecommendedProductsComponent } from './recommended-products/recommended-products.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -32,7 +36,16 @@ const routes: Routes = [
   { path: 'notification', component: NotificationComponent },
   { path: 'productListClient', component: ProductListClientComponent },
   { path: 'produitparCategorieClient', component: ProduitParCategorieClientComponent },
+  { path: 'produit-detailsClient/:id', component: ProduitDetailsClientComponent},
+  { path: 'stock-dashboard', component: StockPurchaseDashboardComponent },
+  { path: 'promotionsClient', component: ProductPromotionViewComponent },
+  { path: 'RecommendedProducts', component:  RecommendedProductsComponent },
 
+
+  { 
+    path: 'promotions', 
+    loadChildren: () => import('./promotion-routing.module').then(m => m.PromotionsRoutingModule)},
+    { path: '', loadChildren: () => import('./fidelity/fidelity.module').then(m => m.FidelityModule) },
   {
     path: 'produits-par-categorie',
     component: ProduitParCategorieComponent

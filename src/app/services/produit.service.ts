@@ -1,17 +1,28 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { Produit } from '../models/produit.model';
 import { Page } from '../models/page.model';
 
 @Injectable({ providedIn: 'root' })
 export class ProduitService {
   private baseUrl = 'http://localhost:8082/api/produits';
+  private productsSubject = new BehaviorSubject<Produit[]>([]);
+  products$ = this.productsSubject.asObservable();
 
   constructor(private http: HttpClient) {}
 
   getAll(): Observable<Produit[]> {
     return this.http.get<Produit[]>(this.baseUrl);
+  }
+
+  setProducts(products: Produit[]): void {
+    this.productsSubject.next(products);
+  }
+
+  getCachedProducts(): Produit[] {
+    return this.productsSubject.getValue();
   }
 
   getById(id: number): Observable<Produit> {
@@ -20,11 +31,22 @@ export class ProduitService {
 
   getByCategory(category: string, page: number = 0, pageSize: number = 10, sortBy: string = 'id'): Observable<Page<Produit>> {
     let params = new HttpParams()
-      .set('category', category.toUpperCase()) // Ensure category is uppercase to match enum
+      .set('category', category.toUpperCase())
       .set('page', page.toString())
       .set('pageSize', pageSize.toString())
       .set('sortBy', sortBy);
     return this.http.get<Page<Produit>>(`${this.baseUrl}/categorie`, { params });
+  }
+
+  searchProducts(query: string): Observable<Produit[]> {
+    const params = new HttpParams().set('search', query);
+    return this.http.get<Produit[]>(`${this.baseUrl}/search`, { params })
+      .pipe(
+        catchError(error => {
+          console.error('Erreur de recherche:', error);
+          return of([]);
+        })
+      );
   }
 
   create(produit: Produit): Observable<Produit> {

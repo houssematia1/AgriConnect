@@ -5,6 +5,10 @@ import { Produit } from '../models/produit.model';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import Swiper, { Navigation } from 'swiper';
 import { Router } from '@angular/router';
+import { FormControl } from '@angular/forms';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 interface ProductDisplay {
   id: number;
@@ -13,6 +17,18 @@ interface ProductDisplay {
   devise: string;
   image: string | SafeUrl;
   quantity: number;
+  stock: number;
+  available: boolean;
+  description?: string;
+  taxe?: number;
+  dateExpiration?: string;
+  fournisseur?: string;
+  fournisseurId?: number;
+  seuilMin?: number;
+  autoReapprovisionnement?: boolean;
+  quantiteReapprovisionnement?: number;
+  category?: string;
+  salesCount?: number;
 }
 
 interface Category {
@@ -26,8 +42,17 @@ interface Category {
   styleUrls: ['./homeclient.component.css']
 })
 export class HomeclientComponent implements OnInit, AfterViewInit {
+  goToProduct(productId: number): void {
+    this.router.navigate(['/product-details', productId]);
+    this.clearSearch();
+  }
   products: ProductDisplay[] = [];
+  isLoading = true;
+  errorMessage: string | null = null;
   recommendedProducts: ProductDisplay[] = [];
+  isLoadingRecommendations = true;
+  recommendationError: string | null = null;
+  
   categories: Category[] = [
     { name: 'FRUITS', image: '/assets/template/images/fuits.jpg' },
     { name: 'LEGUMES', image: '/assets/template/images/vegetables.jpg' },
@@ -35,16 +60,26 @@ export class HomeclientComponent implements OnInit, AfterViewInit {
     { name: 'AUTRE', image: '/assets/template/images/others.jpg' }
   ];
 
+  // Propriétés pour la recherche
+  searchControl = new FormControl('');
+  searchResults: ProductDisplay[] = [];
+  isSearching = false;
+  searchLoading = false;
+  searchError: string | null = null;
+
+  private userId = 2;
+
   constructor(
     private produitService: ProduitService,
     private recommendationService: RecommendationService,
     private sanitizer: DomSanitizer,
-    private router: Router,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
     this.loadProducts();
     this.loadRecommendedProducts();
+    this.setupSearch();
   }
 
   ngAfterViewInit(): void {
@@ -65,6 +100,42 @@ export class HomeclientComponent implements OnInit, AfterViewInit {
     });
   }
 
+  loadRecommendedProducts(): void {
+    this.isLoadingRecommendations = true;
+    this.recommendationError = null;
+    
+    this.recommendationService.getRecommendedProducts(this.userId, 6).subscribe({
+      next: (produits: any[]) => {
+        if (!produits || produits.length === 0) {
+          this.recommendedProducts = [];
+          this.recommendationError = 'Aucun produit recommandé pour le moment. Commencez à acheter pour personnaliser vos recommandations !';
+        } else {
+          this.recommendedProducts = produits.map(produit => ({
+            id: produit.id || 0,
+            name: produit.nom || 'Nom inconnu',
+            price: produit.prix || 0,
+            devise: produit.devise || 'MAD',
+            image: produit.image && produit.image.trim() !== ''
+              ? this.sanitizer.bypassSecurityTrustUrl(produit.image)
+              : '/assets/img/placeholder.jpg',
+            quantity: 1,
+            stock: produit.stock || 0,
+            available: produit.available !== undefined ? produit.available : true,
+            description: produit.description,
+            category: produit.category
+          }));
+        }
+        this.isLoadingRecommendations = false;
+      },
+      error: (err) => {
+        console.error('Erreur lors de la récupération des recommandations:', err);
+        this.recommendationError = 'Erreur lors du chargement des recommandations. Veuillez réessayer plus tard.';
+        this.recommendedProducts = [];
+        this.isLoadingRecommendations = false;
+      }
+    });
+  }
+
   loadProducts(): void {
     this.produitService.getAll().subscribe({
       next: (response: any) => {
@@ -79,35 +150,77 @@ export class HomeclientComponent implements OnInit, AfterViewInit {
             : '/assets/img/placeholder.jpg',
           quantity: 1
         }));
+        this.isLoading = false;
       },
       error: (err) => {
-        console.error('Error loading products:', err);
+        console.error('Erreur chargement produits:', err);
+        this.errorMessage = 'Erreur lors du chargement des produits';
+        this.isLoading = false;
       }
     });
-  }
-  goToCategorie(categ: string) {
-    this.router.navigate(['/produitCategorieparClient'], { queryParams: { categ } });
   }
 
-  loadRecommendedProducts(): void {
-    const userId = 1; // À remplacer par l'ID de l'utilisateur connecté
-    this.recommendationService.getRecommendationsBasedOnHistory(userId, 6).subscribe({
-      next: (produits: Produit[]) => {
-        this.recommendedProducts = produits.map((produit: Produit) => ({
-          id: produit.id!,
-          name: produit.nom,
-          price: produit.prix,
-          devise: produit.devise || 'XAF',
-          image: produit.image && produit.image.trim() !== ''
-            ? this.sanitizer.bypassSecurityTrustUrl(produit.image)
-            : '/assets/img/placeholder.jpg',
-          quantity: 1
-        }));
-      },
-      error: (err) => {
-        console.error('Error loading recommended products:', err);
-      }
-    });
+  private setupSearch(): void {
+    this.searchControl.valueChanges
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap(query => {
+          const searchTerm = query?.trim() || '';
+          this.isSearching = searchTerm.length > 0;
+          this.searchLoading = this.isSearching;
+          this.searchError = null;
+          
+          if (!this.isSearching) {
+            this.searchResults = [];
+            return [];
+          }
+          
+          return this.produitService.searchProducts(searchTerm).pipe(
+            catchError(err => {
+              console.error('Search error:', err);
+              this.searchError = 'Erreur lors de la recherche';
+              this.searchLoading = false;
+              return of([]);
+            })
+          );
+        })
+      )
+      .subscribe({
+        next: (results) => {
+          this.searchResults = results.map((produit: any) => ({
+            id: produit.id || 0,
+            name: produit.nom || 'Nom inconnu',
+            price: produit.prix || 0,
+            devise: produit.devise || 'MAD',
+            image: produit.image && produit.image.trim() !== ''
+              ? this.sanitizer.bypassSecurityTrustUrl(produit.image)
+              : '/assets/img/placeholder.jpg',
+            quantity: 1,
+            stock: produit.stock || 0,
+            available: produit.available !== undefined ? produit.available : true,
+            description: produit.description,
+            category: produit.category
+          }));
+          this.searchLoading = false;
+        },
+        error: (err) => {
+          console.error('Search subscription error:', err);
+          this.searchError = 'Erreur lors de la recherche';
+          this.searchLoading = false;
+        }
+      });
+  }
+
+  clearSearch(): void {
+    this.searchControl.setValue('');
+    this.isSearching = false;
+    this.searchResults = [];
+    this.searchError = null;
+  }
+
+  goToCategorie(categ: string) {
+    this.router.navigate(['/produitCategorieparClient'], { queryParams: { categ } });
   }
 
   handleImageError(event: Event): void {
@@ -118,16 +231,26 @@ export class HomeclientComponent implements OnInit, AfterViewInit {
   }
 
   addToCart(product: ProductDisplay): void {
-    console.log(`Added ${product.name} to cart: ID=${product.id}, Quantity=${product.quantity}`);
-    // Integrate with CartService: this.cartService.addToCart({ ...product });
+    console.log(`Ajouté ${product.name} au panier: ID=${product.id}, Quantité=${product.quantity}`);
+    // Implémentez ici la logique d'ajout au panier
   }
 
   toggleWishlist(product: ProductDisplay): void {
-    console.log(`Toggled wishlist for ${product.name} (ID: ${product.id})`);
-    // Integrate with WishlistService: this.wishlistService.toggle(product.id);
+    console.log(`Toggle wishlist pour ${product.name} (ID: ${product.id})`);
+    // Implémentez ici la logique de wishlist
   }
 
   trackByProductId(index: number, product: ProductDisplay): number {
     return product.id;
+  }
+
+  onSearchSubmit(event: Event): void {
+    event.preventDefault();
+    if (this.searchControl.value && this.searchControl.value.trim()) {
+      this.router.navigate(['/product-list'], { 
+        queryParams: { search: this.searchControl.value.trim() } 
+      });
+      this.clearSearch();
+    }
   }
 }

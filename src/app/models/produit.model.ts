@@ -1,3 +1,5 @@
+import { SafeUrl } from "@angular/platform-browser";
+
 export interface Produit {
   id?: number;
   nom: string;
@@ -8,12 +10,14 @@ export interface Produit {
   dateExpiration?: string;
   fournisseur?: string;
   fournisseurId?: number;
-  image?: string;
+  image?: string ;
   stock: number;
   seuilMin?: number;
   autoReapprovisionnement?: boolean;
   quantiteReapprovisionnement?: number;
   category?: string;
   available: boolean;
+  salesCount?: number;
+  quantity?: number;
 
 }

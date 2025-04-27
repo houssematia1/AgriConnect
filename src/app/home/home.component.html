@@ -130,18 +130,16 @@
       </div>
     </div>
     <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar">
-
       <div class="offcanvas-header justify-content-between">
         <h4 class="fw-normal text-uppercase fs-6">My Account</h4>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
       </div>
     
       <div class="offcanvas-body">
-    
         <ul class="navbar-nav justify-content-end menu-list list-unstyled d-flex gap-md-3 mb-0">
           <!-- Profile Section -->
           <li class="nav-item border-dashed">
-            <a href="/profile" class="nav-link d-flex align-items-center gap-3 text-dark p-2">
+            <a routerLink="/profile" class="nav-link d-flex align-items-center gap-3 text-dark p-2">
               <svg width="24" height="24" viewBox="0 0 24 24"><use xlink:href="#user"></use></svg>
               <span>My Farmer Profile</span>
             </a>
@@ -156,28 +154,33 @@
                 <span>My Products ({{ products?.length || 0 }})</span>
               </div>
             </button>
-            <!-- Remove the collapse section if not needed -->
           </li>
     
           <!-- Create Product -->
           <li class="nav-item border-dashed">
-            <a href="/produit-create" class="nav-link d-flex align-items-center gap-3 text-dark p-2">
+            <a routerLink="/produit-create" class="nav-link d-flex align-items-center gap-3 text-dark p-2">
               <svg width="24" height="24" viewBox="0 0 24 24"><use xlink:href="#add"></use></svg>
               <span>Create New Product</span>
             </a>
           </li>
     
+          <!-- Stock Dashboard (Nouveau) -->
+          <li class="nav-item border-dashed">
+            <a routerLink="/stock-dashboard" class="nav-link d-flex align-items-center gap-3 text-dark p-2">
+              <svg width="24" height="24" viewBox="0 0 24 24"><use xlink:href="#stock"></use></svg>
+              <span>Stock Dashboard</span>
+            </a>
+          </li>
+    
           <!-- Logout -->
           <li class="nav-item border-dashed mt-4">
-            <a href="/logout" class="nav-link d-flex align-items-center gap-3 text-danger p-2">
-              <svg width="24" height="24" viewBox="0 0 24 24"><use xlink:href="#logout"></use></svg>
+            <a routerLink="/logout" class="nav-link d-flex align-items-center gap-3 text-danger p-2">
+              <svg width="24" height="24" viewBox="0 24"><use xlink:href="#logout"></use></svg>
               <span>Logout</span>
             </a>
           </li>
         </ul>
-    
       </div>
-    
     </div>
 
     <header>
@@ -201,9 +204,7 @@
               <div class="col-md-4 d-none d-md-block">
                 <select class="form-select border-0 bg-transparent">
                   <option>All Categories</option>
-                  <option>Groceries</option>
-                  <option>Drinks</option>
-                  <option>Chocolates</option>
+                  
                 </select>
               </div>
               <div class="col-11 col-md-7">
@@ -276,28 +277,35 @@
         <div class="row">
           <div class="col-lg-6 pt-5 mt-5">
             <h2 class="display-1 ls-1"><span class="fw-bold text-primary">Organic</span> Foods at your <span class="fw-bold">Doorsteps</span></h2>
-            <p class="fs-4">Dignissim massa diam elementum.</p>
+            <p class="fs-4">Une touche d'élégance naturelle
+            </p>
             <div class="d-flex gap-3">
-              <a href="#" class="btn btn-primary text-uppercase fs-6 rounded-pill px-4 py-3 mt-3">Start Shopping</a>
-              <a href="#" class="btn btn-dark text-uppercase fs-6 rounded-pill px-4 py-3 mt-3">Join Now</a>
+              <a href="#" class="btn btn-primary text-uppercase fs-6 rounded-pill px-4 py-3 mt-3">Commencez vos achats
+              </a>
+              <a href="#" class="btn btn-dark text-uppercase fs-6 rounded-pill px-4 py-3 mt-3">Inscrivez-vous et profitez de nos offres exclusives ! 🎉
+
+              </a>
             </div>
             <div class="row my-5">
               <div class="col">
                 <div class="row text-dark">
                   <div class="col-auto"><p class="fs-1 fw-bold lh-sm mb-0">14k+</p></div>
-                  <div class="col"><p class="text-uppercase lh-sm mb-0">Product Varieties</p></div>
+                  <div class="col"><p class="text-uppercase lh-sm mb-0">Variété de produits
+                  </p></div>
                 </div>
               </div>
               <div class="col">
                 <div class="row text-dark">
                   <div class="col-auto"><p class="fs-1 fw-bold lh-sm mb-0">50k+</p></div>
-                  <div class="col"><p class="text-uppercase lh-sm mb-0">Happy Customers</p></div>
+                  <div class="col"><p class="text-uppercase lh-sm mb-0">Clients satisfaits
+                  </p></div>
                 </div>
               </div>
               <div class="col">
                 <div class="row text-dark">
-                  <div class="col-auto"><p class="fs-1 fw-bold lh-sm mb-0">10+</p></div>
-                  <div class="col"><p class="text-uppercase lh-sm mb-0">Store Locations</p></div>
+                  <div class="col-auto"><p class="fs-1 fw-bold lh-sm mb-0">24+</p></div>
+                  <div class="col"><p class="text-uppercase lh-sm mb-0">Livraison partout
+                  </p></div>
                 </div>
               </div>
             </div>
@@ -313,8 +321,11 @@
                 </div>
                 <div class="col-md-9">
                   <div class="card-body p-0">
-                    <h5 class="text-light">Fresh from farm</h5>
-                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipi elit.</p>
+                    <h5 class="text-light">Fraîcheur de la ferme
+                    </h5>
+                    <p class="card-text">Directement du producteur à votre assiette, pour une qualité et un goût incomparables. 🥬🚜
+
+                    </p>
                   </div>
                 </div>
               </div>
@@ -328,8 +339,11 @@
                 </div>
                 <div class="col-md-9">
                   <div class="card-body p-0">
-                    <h5 class="text-light">100% Organic</h5>
-                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipi elit.</p>
+                    <h5 class="text-light">100 % Bio
+                    </h5>
+                    <p class="card-text">Des produits frais et naturels, cultivés sans pesticides ni produits chimiques. 🌿
+
+                    </p>
                   </div>
                 </div>
               </div>
@@ -343,8 +357,9 @@
                 </div>
                 <div class="col-md-9">
                   <div class="card-body p-0">
-                    <h5 class="text-light">Free delivery</h5>
-                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipi elit.</p>
+                    <h5 class="text-light">Livraison gratuite
+                    </h5>
+                    <p class="card-text">Livraison gratuite sur tes 3 premières commandes – c’est cadeau 🎁 !</p>
                   </div>
                 </div>
               </div>
@@ -360,9 +375,12 @@
         <div class="row">
           <div class="col-md-12">
             <div class="section-header d-flex flex-wrap justify-content-between mb-5">
-              <h2 class="section-title">Category</h2>
+              <h2 class="section-title">Explorez nos différentes catégories pour trouver ce que vous cherchez ! 🏷️
+
+              </h2>
               <div class="d-flex align-items-center">
-                <a routerLink="/products" class="btn btn-primary me-2">View All</a>
+                <a routerLink="/products" class="btn btn-primary me-2">Voir tout
+                </a>
                 <div class="swiper-buttons">
                   <button class="swiper-prev category-carousel-prev btn btn-yellow">❮</button>
                   <button class="swiper-next category-carousel-next btn btn-yellow">❯</button>
@@ -392,7 +410,8 @@
             <div class="section-header d-flex flex-wrap justify-content-between my-4">
               <h2 class="section-title">Products</h2>
               <div class="d-flex align-items-center">
-                <a routerLink="products" class="btn btn-primary rounded-1">View All</a>
+                <a routerLink="products" class="btn btn-primary rounded-1">Voir tout
+                </a>
               </div>
             </div>
           </div>
@@ -430,7 +449,8 @@
                         </div>
                         <div class="col-7">
                           <a href="#" class="btn btn-primary rounded-1 p-2 fs-7 btn-cart">
-                            <svg width="18" height="18"><use xlink:href="#cart"></use></svg> Add to Cart
+                            <svg width="18" height="18"><use xlink:href="#cart"></use></svg> Ajouter au panier
+
                           </a>
                         </div>
                         <div class="col-2">
@@ -537,81 +557,7 @@
    
 
 
-    <section id="latest-blog" class="pb-4">
-      <div class="container-lg">
-        <div class="row">
-          <div class="section-header d-flex align-items-center justify-content-between my-4">
-            <h2 class="section-title">Our Recent Blog</h2>
-            <a href="#" class="btn btn-primary">View All</a>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-md-4">
-            <article class="post-item card border-0 shadow-sm p-3">
-              <div class="image-holder zoom-effect">
-                <a href="#">
-                  <img src="/assets/template/images/post-thumbnail-1.jpg" alt="post" class="card-img-top">
-                </a>
-              </div>
-              <div class="card-body">
-                <div class="post-meta d-flex text-uppercase gap-3 my-2 align-items-center">
-                  <div class="meta-date"><svg width="16" height="16"><use xlink:href="#calendar"></use></svg>22 Aug 2021</div>
-                  <div class="meta-categories"><svg width="16" height="16"><use xlink:href="#category"></use></svg>tips & tricks</div>
-                </div>
-                <div class="post-header">
-                  <h3 class="post-title">
-                    <a href="#" class="text-decoration-none">Top 10 casual look ideas to dress up your kids</a>
-                  </h3>
-                  <p>Lorem ipsum dolor sit amet, consectetur adipi elit. Aliquet eleifend viverra enim tincidunt donec quam. A in arcu, hendrerit neque dolor morbi...</p>
-                </div>
-              </div>
-            </article>
-          </div>
-          <div class="col-md-4">
-            <article class="post-item card border-0 shadow-sm p-3">
-              <div class="image-holder zoom-effect">
-                <a href="#">
-                  <img src="/assets/template/images/post-thumbnail-2.jpg" alt="post" class="card-img-top">
-                </a>
-              </div>
-              <div class="card-body">
-                <div class="post-meta d-flex text-uppercase gap-3 my-2 align-items-center">
-                  <div class="meta-date"><svg width="16" height="16"><use xlink:href="#calendar"></use></svg>25 Aug 2021</div>
-                  <div class="meta-categories"><svg width="16" height="16"><use xlink:href="#category"></use></svg>trending</div>
-                </div>
-                <div class="post-header">
-                  <h3 class="post-title">
-                    <a href="#" class="text-decoration-none">Latest trends of wearing street wears supremely</a>
-                  </h3>
-                  <p>Lorem ipsum dolor sit amet, consectetur adipi elit. Aliquet eleifend viverra enim tincidunt donec quam. A in arcu, hendrerit neque dolor morbi...</p>
-                </div>
-              </div>
-            </article>
-          </div>
-          <div class="col-md-4">
-            <article class="post-item card border-0 shadow-sm p-3">
-              <div class="image-holder zoom-effect">
-                <a href="#">
-                  <img src="/assets/template/images/post-thumbnail-3.jpg" alt="post" class="card-img-top">
-                </a>
-              </div>
-              <div class="card-body">
-                <div class="post-meta d-flex text-uppercase gap-3 my-2 align-items-center">
-                  <div class="meta-date"><svg width="16" height="16"><use xlink:href="#calendar"></use></svg>28 Aug 2021</div>
-                  <div class="meta-categories"><svg width="16" height="16"><use xlink:href="#category"></use></svg>inspiration</div>
-                </div>
-                <div class="post-header">
-                  <h3 class="post-title">
-                    <a href="#" class="text-decoration-none">10 Different Types of comfortable clothes ideas for women</a>
-                  </h3>
-                  <p>Lorem ipsum dolor sit amet, consectetur adipi elit. Aliquet eleifend viverra enim tincidunt donec quam. A in arcu, hendrerit neque dolor morbi...</p>
-                </div>
-              </div>
-            </article>
-          </div>
-        </div>
-      </div>
-    </section>
+    
 
     <section class="pb-4 my-4">
       <div class="container-lg">

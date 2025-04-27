@@ -20,7 +20,22 @@ import { NotificationComponent } from './notification/notification.component';
 import { ProductListClientComponent } from './product-list-client/product-list-client.component';
 import { ProduitParCategorieClientComponent } from './produit-par-categorie-client/produit-par-categorie-client.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-
+import { ProduitDetailsClientComponent } from './produit-details-client/produit-details-client.component';
+import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
+import { ProduitExpirationListComponent } from './produit-expiration-list/produit-expiration-list.component';
+import { PromotionAddComponent } from './promotion-add/promotion-add.component';
+import { PromotionAnalyticsComponent } from './promotion-analytics/promotion-analytics.component';
+import { PromotionFormComponent } from './promotion-form/promotion-form.component';
+import { PromotionMenuComponent } from './promotion-menu/promotion-menu.component';
+import { PromotionListComponent } from './promotion-list/promotion-list.component';
+import { PromotionsRoutingModule } from './promotion-routing.module';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { NgChartsModule } from 'ng2-charts';
+import { StockPurchaseDashboardComponent } from './stock-purchase-dashboard/stock-purchase-dashboard.component';
+import { ProductPromotionViewComponent } from './product-promotion-view/product-promotion-view.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -37,6 +52,22 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     NotificationComponent,
     ProductListClientComponent,
     ProduitParCategorieClientComponent,
+    ProduitDetailsClientComponent,
+    
+    ConfirmDialogComponent,
+    ProduitExpirationListComponent,
+    PromotionAddComponent,
+    PromotionAnalyticsComponent,
+    PromotionFormComponent,
+    PromotionListComponent,
+    PromotionMenuComponent,
+   
+    StockPurchaseDashboardComponent,
+        ProductPromotionViewComponent,
+
+   
+   
+    
    
    
   ],
@@ -49,6 +80,14 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     RouterModule,
     CommonModule,
     BrowserAnimationsModule,
+    PromotionsRoutingModule,
+    MatDialogModule,
+    MatTooltipModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    NgChartsModule,
+
+    
     
     
   ],
