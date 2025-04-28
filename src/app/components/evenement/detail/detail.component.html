@@ -1,0 +1,62 @@
+<div *ngIf="evenement" class="detail-container">
+  <div class="detail-card">
+    <!-- Image à gauche -->
+    <div class="detail-image-wrapper">
+      <img *ngIf="evenement.imageUrl"
+           [src]="'http://localhost:8082' + evenement.imageUrl"
+           class="detail-image" />
+    </div>
+
+    <!-- Contenu à droite -->
+    <div class="detail-content">
+      <h2 class="detail-title">{{ evenement.nom }}</h2>
+
+      <p class="detail-field">
+        <span class="detail-label">Description:</span>
+        {{ evenement.description || 'Non spécifiée' }}
+      </p>
+      <button (click)="generateResume()" class="btn btn-primary" style="margin-top: 1rem;">
+        Générer Résumé
+      </button>
+      
+      <div *ngIf="resume" style="margin-top: 1rem; background: #f0f4f8; padding: 1rem; border-radius: 8px;">
+        <h4>Résumé de l'événement :</h4>
+        <p>{{ resume }}</p>
+      </div>
+      
+      <p class="detail-field">
+        <span class="detail-label">Date début:</span>
+        {{ evenement.dateDebut ? (evenement.dateDebut | date:'fullDate') : 'Non spécifié' }}
+      </p>
+      <p class="detail-field">
+        <span class="detail-label">Date fin:</span>
+        {{ evenement.dateFin ? (evenement.dateFin | date:'fullDate') : 'Non spécifié' }}
+      </p>
+      <p class="detail-field">
+        <span class="detail-label">Lieu sur la carte :</span>
+      </p>
+      <div id="map-detail" class="detail-map"></div>
+
+      <p class="detail-field">
+        <span class="detail-label">Capacité:</span>
+        {{ evenement.capaciteMax ?? 'Non spécifiée' }}
+      </p>
+      <p class="detail-field">
+        <span class="detail-label">Organisateur:</span>
+        {{ evenement.organisateur || 'Non spécifié' }}
+      </p>
+      <p class="detail-field">
+        <span class="detail-label">Statut:</span>
+        {{ evenement.statut || 'Non spécifié' }}
+      </p>
+      <p class="detail-field">
+        <span class="detail-label">Catégories:</span>
+        {{ getCategorieNames() }}
+      </p>
+
+      <a routerLink="/evenements" class="detail-back-btn">
+        ← Retour à la liste
+      </a>
+    </div>
+  </div>
+</div>

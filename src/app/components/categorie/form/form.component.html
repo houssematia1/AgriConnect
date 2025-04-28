@@ -1,0 +1,13 @@
+<div class="form-container">
+    <h2>Ajouter une nouvelle catégorie</h2>
+  
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <input type="text" formControlName="nom" placeholder="Nom de la catégorie" />
+      <div *ngIf="form.get('nom')?.touched && form.get('nom')?.invalid" class="error">
+        Le nom est requis.
+      </div>
+  
+      <button type="submit">Créer</button>
+    </form>
+  </div>
+  

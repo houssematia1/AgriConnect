@@ -1,0 +1,80 @@
+<h2 class="text-2xl font-semibold text-center mb-6">
+  {{ isEdit ? 'Modifier' : 'Ajouter' }} un événement
+</h2>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="max-w-xl mx-auto bg-white p-6 rounded shadow space-y-4">
+
+  <!-- Nom -->
+  <input type="text" formControlName="nom" placeholder="Nom"
+    class="border p-2 block w-full rounded" />
+  <div *ngIf="form.get('nom')?.touched && form.get('nom')?.invalid" class="text-red-600 text-sm">
+    Le nom est requis.
+  </div>
+
+  <!-- Description -->
+  <textarea formControlName="description" placeholder="Description"
+    class="border p-2 block w-full rounded resize-y"></textarea>
+  <div *ngIf="form.get('description')?.touched && form.get('description')?.invalid" class="text-red-600 text-sm">
+    La description est requise.
+  </div>
+
+  <!-- Dates -->
+  <input type="datetime-local" formControlName="dateDebut"
+    class="border p-2 block w-full rounded" />
+  <div *ngIf="form.get('dateDebut')?.touched && form.get('dateDebut')?.invalid" class="text-red-600 text-sm">
+    La date de début est requise.
+  </div>
+
+  <input type="datetime-local" formControlName="dateFin"
+    class="border p-2 block w-full rounded" />
+  <div *ngIf="form.get('dateFin')?.touched && form.get('dateFin')?.invalid" class="text-red-600 text-sm">
+    La date de fin est requise.
+  </div>
+
+  <!-- Carte + Lieu -->
+  <div class="mb-2">
+    <label>Choisissez le lieu sur la carte :</label>
+    <div id="map" class="leaflet-map mt-2"></div>
+  </div>
+  <input type="text" formControlName="lieu" readonly placeholder="Lieu (lat,lng)"
+    class="border p-2 block w-full rounded" />
+  <div *ngIf="form.get('lieu')?.touched && form.get('lieu')?.invalid" class="text-red-600 text-sm">
+    Le lieu est requis.
+  </div>
+
+  <!-- Capacité -->
+  <input type="number" formControlName="capaciteMax" placeholder="Capacité max"
+    class="border p-2 block w-full rounded" />
+  <div *ngIf="form.get('capaciteMax')?.touched && form.get('capaciteMax')?.invalid" class="text-red-600 text-sm">
+    Capacité requise (minimum 1).
+  </div>
+
+  <!-- Organisateur -->
+  <input type="text" formControlName="organisateur" placeholder="Organisateur"
+    class="border p-2 block w-full rounded" />
+  <div *ngIf="form.get('organisateur')?.touched && form.get('organisateur')?.invalid" class="text-red-600 text-sm">
+    Organisateur requis.
+  </div>
+
+  <!-- Upload d'image -->
+<label for="image">Image</label>
+<input type="file" (change)="onImageSelected($event)" class="block w-full border p-2 rounded" />
+<img *ngIf="uploadedImageUrl" [src]="uploadedImageUrl" class="mt-2 max-h-40 rounded shadow" />
+
+  <!-- Statut -->
+
+  <!-- Catégories -->
+  <label for="categories" class="block font-medium">Catégories</label>
+  <select formControlName="categories" multiple class="border p-2 block w-full rounded h-32">
+    <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.nom }}</option>
+  </select>
+  <div *ngIf="form.get('categories')?.touched && form.get('categories')?.invalid" class="text-red-600 text-sm">
+    Veuillez sélectionner au moins une catégorie.
+  </div>
+
+  <!-- Bouton -->
+  <button type="submit"
+    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded w-full">
+    {{ isEdit ? 'Mettre à jour' : 'Créer' }}
+  </button>
+</form>

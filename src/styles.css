@@ -1,1 +1,10 @@
-/* You can add global styles to this file, and also import other style files */
+/* Corrige les chemins des icônes leaflet */
+.leaflet-container .leaflet-marker-icon {
+    background-image: url("/assets/leaflet/marker-icon.png") !important;
+  }
+  .leaflet-container .leaflet-marker-shadow {
+    background-image: url("/assets/leaflet/marker-shadow.png") !important;
+  }
+  
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

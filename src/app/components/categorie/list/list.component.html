@@ -1,0 +1,30 @@
+<div class="container">
+    <h2>Liste des Catégories</h2>
+  
+    <div *ngIf="categories.length === 0">
+      <p>Aucune catégorie trouvée.</p>
+    </div>
+  
+    <table *ngIf="categories.length > 0" class="categorie-table">
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let categorie of categories">
+          <td>{{ categorie.nom }}</td>
+          <td>
+            <!-- Bouton Edit -->
+            <!-- (Optionnel pour futur update) -->
+            <!-- <button (click)="editCategorie(categorie.id)">✏️ Modifier</button> -->
+  
+            <!-- Bouton Delete -->
+            <button (click)="deleteCategorie(categorie.id)">🗑️ Supprimer</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  

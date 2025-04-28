@@ -1,0 +1,64 @@
+<div class="container">
+  <h2 class="title">🌿 Événements Écologiques</h2>
+
+  <!-- Section recherche et ajout -->
+  <div class="controls">
+    <input
+      type="text"
+      [(ngModel)]="searchTerm"
+      placeholder="🔍 Rechercher un événement..."
+      class="search-input"
+    />
+    <a routerLink="/evenements/new" class="btn btn-primary">
+      ➕ Ajouter un événement
+    </a>
+  </div>
+
+  <!-- Message si aucun résultat -->
+  <div *ngIf="filteredEvenements.length === 0" class="no-events">
+    Aucun événement trouvé pour cette recherche.
+  </div>
+
+  <!-- Affichage en cartes -->
+  <div *ngIf="filteredEvenements.length > 0" class="event-grid">
+    <div class="event-card" *ngFor="let e of filteredEvenements">
+      <div class="event-image" [style.backgroundImage]="'url(http://localhost:8082' + e.imageUrl + ')'" [routerLink]="['/evenements', e.id]">
+        <span class="read-time">{{ e.dateDebut | date:'mediumDate' }}</span>
+      </div>
+
+      <div class="event-body">
+        <div class="event-tag" [ngClass]="{
+          'planifie': e.statut === 'PLANIFIE',
+          'en-cours': e.statut === 'EN_COURS',
+          'termine': e.statut === 'TERMINE',
+          'inconnu': !e.statut
+        }">
+          {{ e.statut || 'Statut inconnu' }}
+        </div>
+
+        <h3 class="event-title" [routerLink]="['/evenements', e.id]">
+          {{ e.nom }}
+        </h3>
+
+        <p class="event-description">
+          {{ e.description || 'Pas de description.' }}
+        </p>
+
+        <div class="event-info">
+          👤 Organisateur : {{ e.organisateur || 'Non spécifié' }}<br>
+          👥 Capacité : {{ e.capaciteMax ?? 'Non spécifiée' }}<br>
+          🗂️ Catégories : {{ getCategorieNames(e) }}
+        </div>
+
+        <div class="event-actions">
+          <a [routerLink]="['/evenements/edit', e.id]" class="btn btn-warning">
+            ✏️ Modifier
+          </a>
+          <button (click)="delete(e.id)" class="btn btn-danger">
+            🗑️ Supprimer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
