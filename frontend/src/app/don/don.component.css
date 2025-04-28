@@ -1,0 +1,121 @@
+.container { padding:20px;max-width:1200px;margin:0 auto; }
+.stats-section { margin-bottom:20px; }
+.stats-section h3 { margin-bottom:10px; }
+canvas { max-width:400px;max-height:400px; }
+.don-table { width:100%;border-collapse:collapse;margin-top:20px; }
+.don-table th, .don-table td { padding:12px;text-align:left;border-bottom:1px solid#ddd; }
+.don-table th { background-color:#f5f5f5; }
+.btn-add,.btn-edit,.btn-delete,.btn-filter,.btn-reset,.btn-download,.btn-claim { padding:8px 16px;border:none;border-radius:4px;cursor:pointer;margin:2px; }
+.btn-add{background:#4CAF50;color:#fff;}
+.btn-edit{background:#2196F3;color:#fff;}
+.btn-delete{background:#f44336;color:#fff;}
+.btn-claim{background:#ff9800;color:#fff;}
+.btn-download{background:#666;color:#fff;}
+.btn-filter{background:#2196F3;color:#fff;}
+.btn-reset{background:#666;color:#fff;}
+.status { padding:4px 8px;border-radius:12px;font-size:.9em; }
+.status.pending{background:#fff0c2;color:#8a5340;}
+.status.accepte{background:#c8e6c9;color:#256029;}
+.status.refuse{background:#ffcdd2;color:#c63737;}
+.form-modal{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;justify-content:center;align-items:center;z-index:1001;}
+.modal-content{background:#fff;padding:20px;border-radius:8px;width:400px;}
+.form-group{margin-bottom:15px;}
+.form-group label{display:block;margin-bottom:5px;}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:8px;border:1px solid#ddd;border-radius:4px;}
+.form-actions{text-align:right;}
+.btn-submit{background:#4CAF50;color:#fff;}
+.btn-cancel{background:#666;color:#fff;margin-right:10px;}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;justify-content:center;align-items:center;z-index:1000;}
+.delete-modal{background:#fff;padding:25px;border-radius:8px;width:400px;max-width:90%;box-shadow:0 4px 8px rgba(0,0,0,0.1);}
+.delete-modal h3{margin-top:0;color:#f44336;}
+.delete-modal p{margin-bottom:25px;line-height:1.5;}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;}
+button:disabled{opacity:.6;cursor:not-allowed;}
+.filter-section{background:#f5f5f5;padding:15px;border-radius:8px;margin-bottom:20px;}
+.filter-section h3{margin-top:0;color:#333;}
+.price-filter{display:flex;flex-wrap:wrap;gap:15px;align-items:flex-end;}
+.filter-group{flex:1;min-width:150px;}
+.filter-group label{display:block;margin-bottom:5px;font-weight:500;}
+.filter-group input{width:100%;padding:8px;border:1px solid#ddd;border-radius:4px;}
+.filter-actions{display:flex;gap:10px;align-items:center;}
+.no-results{padding:15px;background:#fff0f0;border:1px solid#ffcdd2;border-radius:4px;margin-top:20px;text-align:center;color:#c63737;}
+.confirmation-modal{background:#fff;padding:20px;border-radius:8px;box-shadow:0 4px 8px rgba(0,0,0,0.1);}
+/* Add these styles to don.component.css */
+
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  gap: 10px;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 5px;
+}
+
+.btn-pagination, .btn-page {
+  padding: 8px 12px;
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-pagination:hover, .btn-page:hover {
+  background-color: #e9e9e9;
+}
+
+.btn-pagination:disabled {
+  background-color: #f5f5f5;
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+.btn-page.active {
+  background-color: #4CAF50;
+  color: white;
+  border-color: #4CAF50;
+}
+
+.no-results {
+  text-align: center;
+  padding: 20px;
+  font-style: italic;
+  color: #666;
+}
+
+.confirmation-modal {
+  background-color: white;
+  padding: 20px;
+  border-radius: 4px;
+  max-width: 400px;
+  margin: 0 auto;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.confirmation-modal h3 {
+  color: #4CAF50;
+  margin-bottom: 15px;
+}
+
+.modal-actions {
+  margin-top: 20px;
+}
+
+.btn-confirm {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-confirm:hover {
+  background-color: #3e8e41;
+}

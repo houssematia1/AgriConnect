@@ -1,0 +1,167 @@
+<!-- src/app/don/don.component.html -->
+<div class="container">
+  <h2>Donations Management</h2>
+
+  <!-- Filter by amount -->
+  <div class="filter-section">
+    <h3>Filter by Amount</h3>
+    <div class="price-filter">
+      <div class="filter-group">
+        <label>Min Amount:</label>
+        <input type="number" [(ngModel)]="minPrice" placeholder="Min">
+      </div>
+      <div class="filter-group">
+        <label>Max Amount:</label>
+        <input type="number" [(ngModel)]="maxPrice" placeholder="Max">
+      </div>
+      <div class="filter-actions">
+        <button class="btn-filter" (click)="onFilterByPrice()">Apply</button>
+        <button class="btn-reset" (click)="resetPriceFilter()">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-add" (click)="openForm()">Add New Donation</button>
+  <button class="btn-download" (click)="downloadPDF()">Download PDF</button>
+
+  <!-- Pie chart -->
+  <div class="stats-section">
+    <h3>Donation Status Distribution</h3>
+    <canvas #pieChart></canvas>
+  </div>
+
+  <!-- Form modal -->
+  <div class="form-modal" *ngIf="showForm">
+    <div class="modal-content">
+      <h3>{{ selectedDon.id ? 'Edit' : 'Add' }} Donation</h3>
+
+      <div class="form-group">
+        <label>Type:</label>
+        <select [(ngModel)]="selectedDon.typeDon">
+          <option value="MONETAIRE">Monétaire</option>
+          <option value="PRODUIT">Produit</option>
+        </select>
+      </div>
+
+      <div class="form-group" *ngIf="selectedDon.typeDon === 'MONETAIRE'">
+        <label>Montant:</label>
+        <input type="number" [(ngModel)]="selectedDon.montant" [min]="!selectedDon.id ? 50 : null" required>
+        <div class="error-message" *ngIf="amountError">{{ amountError }}</div>
+      </div>
+
+      <div class="form-group" *ngIf="selectedDon.typeDon === 'PRODUIT'">
+        <label>Quantité:</label>
+        <input type="number" [(ngModel)]="selectedDon.quantite" [min]="1" required>
+        <div class="error-message" *ngIf="quantiteError">{{ quantiteError }}</div>
+      </div>
+
+      <div class="form-group">
+        <label>Title:</label>
+        <input type="text" [(ngModel)]="selectedDon.titre" required>
+        <div class="error-message" *ngIf="titleError">{{ titleError }}</div>
+      </div>
+
+      <div class="form-group">
+        <label>Description:</label>
+        <textarea [(ngModel)]="selectedDon.description" required></textarea>
+        <div class="error-message" *ngIf="descriptionError">{{ descriptionError }}</div>
+      </div>
+
+      <div class="form-group">
+        <label>Status:</label>
+        <select [(ngModel)]="selectedDon.status" [disabled]="!selectedDon.id">
+          <option value="PENDING">Pending</option>
+          <option value="ACCEPTE">Accepted</option>
+          <option value="REFUSE">Refused</option>
+        </select>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-cancel" (click)="closeForm()">Cancel</button>
+        <button class="btn-submit" (click)="submitForm()">
+          {{ selectedDon.id ? 'Update' : 'Create' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete modal -->
+  <div class="modal-overlay" *ngIf="showDeleteModal">
+    <div class="delete-modal">
+      <h3>Confirm Deletion</h3>
+      <p>Delete "{{ donToDelete?.titre }}"?</p>
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="closeDeleteModal()" [disabled]="isDeleting">Cancel</button>
+        <button class="btn-delete" (click)="confirmDelete()" [disabled]="isDeleting">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <table class="don-table">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Description</th>
+        <th>Value</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let d of paginatedDons">
+        <td>{{ d.titre }}</td>
+        <td>{{ d.description }}</td>
+        <td>{{ d.typeDon === 'MONETAIRE' ? (d.montant | currency) : d.quantite }}</td>
+        <td>
+          <span class="status" [class]="d.status.toLowerCase()">
+            {{ d.status === 'ACCEPTE' ? 'Accepted' : d.status === 'REFUSE' ? 'Refused' : 'Pending' }}
+          </span>
+        </td>
+        <td>
+          <button class="btn-edit" (click)="openForm(d)">Edit</button>
+          <button class="btn-claim" [routerLink]="['/reclamation', d.id]">Claim</button>
+          <button class="btn-delete" (click)="openDeleteModal(d)">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="pagination-controls" *ngIf="filteredDons.length > 0">
+    <button 
+      [disabled]="currentPage === 1" 
+      (click)="goToPage(currentPage - 1)" 
+      class="btn-pagination">&laquo; Previous</button>
+    
+    <div class="page-numbers">
+      <button 
+        *ngFor="let page of [].constructor(totalPages); let i = index" 
+        (click)="goToPage(i + 1)" 
+        class="btn-page" 
+        [class.active]="currentPage === i + 1">
+        {{ i + 1 }}
+      </button>
+    </div>
+    
+    <button 
+      [disabled]="currentPage === totalPages" 
+      (click)="goToPage(currentPage + 1)" 
+      class="btn-pagination">Next &raquo;</button>
+  </div>
+  
+  <!-- No results message -->
+  <div class="no-results" *ngIf="filteredDons.length === 0">
+    No donations found matching your criteria.
+  </div>
+  
+  <!-- Confirmation modal -->
+  <div class="modal-overlay" *ngIf="showConfirmationModal">
+    <div class="confirmation-modal">
+      <h3>Donation Submitted</h3>
+      <p>Thank you for your donation. You will receive a confirmation email shortly.</p>
+      <div class="modal-actions">
+        <button class="btn-confirm" (click)="showConfirmationModal = false">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
